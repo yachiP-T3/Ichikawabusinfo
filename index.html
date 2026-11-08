@@ -37,7 +37,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </head>
 <body>
 <header>
-  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.5</span></div>
+  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.6</span></div>
   <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
   <div class="sub" style="color:#c62828;font-weight:800">一時的に正門前発のバスのみ対応</div>
 </header>
@@ -358,7 +358,8 @@ function renderDepartures(){
   }
   for(let hour=6;hour<=23;hour++){
    const mark=new Date(day.getFullYear(),day.getMonth(),day.getDate(),hour,0,0,0);
-   if(mark.getTime()>now.getTime()&&mark.getTime()<=endTime){
+   const hasBusInHour=list.some(trip=>trip.date===`${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,"0")}-${String(day.getDate()).padStart(2,"0")}`&&Number(trip.time.slice(0,2))===hour);
+   if(hasBusInHour&&mark.getTime()>now.getTime()&&mark.getTime()<=endTime){
     events.push({type:"hour",time:mark.getTime(),label:hour+"時"});
    }
   }
@@ -374,7 +375,7 @@ function renderDepartures(){
  const isIchikawaStop=selected==="市川学園（市川駅）";
  const timeline=events.map(event=>{
   if(event.type==="date"){
-   return `<div style="display:flex;align-items:center;gap:10px;color:#c87575;font-size:14px;font-weight:800;margin:18px 0 14px"><span style="flex:1;border-top:2px solid #edb6b6"></span><span>${event.label}</span><span style="flex:1;border-top:2px solid #edb6b6"></span></div>`;
+   return `<div style="display:flex;align-items:center;gap:10px;color:#c87575;font-size:14px;font-weight:800;margin:18px 0 14px"><span style="white-space:nowrap">${event.label}</span><span style="flex:1;border-top:2px solid #edb6b6"></span></div>`;
   }
   if(event.type==="hour"){
    return `<div style="display:flex;align-items:center;gap:10px;color:#858b91;font-size:13px;font-weight:750;margin:13px 0"><span>${event.label}</span><span style="flex:1;border-top:1px solid #cbd0d5"></span></div>`;
