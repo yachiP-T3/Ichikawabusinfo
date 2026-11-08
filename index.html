@@ -112,7 +112,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
   <div id="adminTools" class="hidden">
   <div class="panel">
     <h2>管理画面</h2>
-    <div class="notice">この試作品はブラウザ内（localStorage）にデータを保存するデモです。同じ端末・同じブラウザでのみ引き継がれ、公開サイトとは同期しません。発車場所は方面ごとに別の停留所として登録します。</div>
+    <div class="notice">時刻表データはSupabaseに保存され、すべての利用者に共通して表示されます。編集できるのは指定された管理者だけです。発車場所は方面ごとに別の停留所として登録します。</div>
     <h3 style="margin-top:20px">発車便を追加</h3>
     <div class="row">
       <div><label>日付</label><input type="date" id="addDate"></div>
@@ -226,13 +226,26 @@ authClient.auth.onAuthStateChange((_event,session)=>{currentAuthUser=session?.us
 refreshAuthState();
 
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
-let trips=[];try{trips=JSON.parse(localStorage.getItem("yachipBusTripsV2")||"[]");if(!Array.isArray(trips))trips=[];}catch(e){trips=[];}
-// 旧版で「市川学園」として保存された便を、系統に応じた個別停留所へ移行する。
-const legacyStopForRoute={"11/12":"市川学園（本八幡）","13":"市川学園（市川大野）","14":"市川学園（市川大野）","15":"市川学園（市川大野）","16":"正門前（本八幡）","71":"市川学園（本八幡）","74":"正門前（本八幡）","一般":"正門前（西船橋）","貸切":"正門前（西船橋）","系統なし":"市川学園（市川駅）"};
-let migrated=false;
-trips=trips.map(t=>{if(t.stop==="市川学園"){migrated=true;return {...t,stop:legacyStopForRoute[t.route]||"市川学園（本八幡）"}}return t});
-const beforeCleanup=trips.length;trips=trips.filter(t=>t.stop!=="市川駅"&&t.route!=="非経由便");if(migrated||trips.length!==beforeCleanup)localStorage.setItem("yachipBusTripsV2",JSON.stringify(trips));
-function save(){localStorage.setItem("yachipBusTripsV2",JSON.stringify(trips))}
+let trips=[];
+let tripsLoaded=false;
+function mapTrip(row){return {id:row.id,date:row.date,time:String(row.time||"").slice(0,5),stop:row.stop,route:row.route,displayDest:row.display_dest||"",via:row.via||""};}
+async function loadTripsFromCloud(){
+  const {data,error}=await authClient.from("trips").select("*").order("date").order("time");
+  if(error){
+    tripsLoaded=false;
+    const msg="時刻表データを読み込めませんでした："+error.message;
+    $("adminMessage").textContent=msg;
+    $("depResult").innerHTML='<div class="empty">'+msg+'</div>';
+    $("ttResult").innerHTML='<div class="empty">'+msg+'</div>';
+    return false;
+  }
+  trips=(data||[]).map(mapTrip);
+  tripsLoaded=true;
+  refreshViews();
+  renderAdmin();
+  return true;
+}
+
 function options(id,arr,first=false){$(id).innerHTML=(first?'<option value="すべて">すべて</option>':"")+arr.map(x=>`<option value="${x}">${x}</option>`).join("")}
 function fillRoute(stopId,routeId,includeAll=true){options(routeId,stationRoutes[$(stopId).value]||[],includeAll)}
 function initStopRoute(stopId,routeId){options(stopId,places);fillRoute(stopId,routeId);$(stopId).addEventListener("change",()=>{fillRoute(stopId,routeId);refreshViews()});$(routeId).addEventListener("change",refreshViews)}
@@ -336,15 +349,53 @@ function renderDepartures(){
  const destination=displayDestination(next);
  $("depResult").innerHTML=schoolToHachimanNotice(selected)+`<p class="muted">${current} 現在 · ${selected} · 日付を問わず未来の便を表示</p><div class="panel" style="margin:0;padding:16px 18px"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="pill">先発</span><span class="bigtime">${next.time}</span>${route?`<span style="font-size:19px;font-weight:900;background:#e8f1ff;color:#174a85;padding:5px 11px;border-radius:9px">${route}</span>`:""}<span style="font-size:18px;font-weight:800">${destination}</span></div>${via?`<div style="font-size:15px;font-weight:600;margin-top:10px;color:var(--muted,#666)">経由：${via}</div>`:""}</div>`;
 }
-function renderTimetable(){if(!$("ttStop").value)return;const list=filtered($("ttStop").value,$("ttDate").value,$("ttRoute").value);$("ttResult").innerHTML=schoolToHachimanNotice($("ttStop").value)+(list.length?`<table><thead><tr><th>発車時刻</th><th>系統</th><th>行先</th><th>経由</th></tr></thead><tbody>${list.map(t=>`<tr><td><b>${t.time}</b></td><td>${displayRoute(t.route)||"—"}</td><td>${displayDestination(t)}</td><td>${viaFor(t.stop,t.route)||t.via||"—"}</td></tr>`).join("")}</tbody></table>`:'<div class="empty">この条件の便はまだ登録されていません。</div>');
+function renderTimetable(){if(!$("ttStop").value)return;const list=filtered($("ttStop").value,$("ttDate").value,$("ttRoute").value);$("ttResult").innerHTML=schoolToHachimanNotice($("ttStop").value)+(list.length?`<table><thead><tr><th>発車時刻</th><th>系統</th><th>行先</th><th>経由</th></tr></thead><tbody>${list.map(t=>`<tr><td><b>${t.time.slice(0,5)}</b></td><td>${displayRoute(t.route)||"—"}</td><td>${displayDestination(t)}</td><td>${viaFor(t.stop,t.route)||t.via||"—"}</td></tr>`).join("")}</tbody></table>`:'<div class="empty">この条件の便はまだ登録されていません。</div>');
 }
 
-function renderAdmin(){if(!ADMIN_UID||currentAuthUser?.id!==ADMIN_UID)return;const list=trips.filter(t=>t.stop===$("adminStop").value&&t.date===$("adminDate").value).sort((a,b)=>a.time.localeCompare(b.time));$("adminTrips").innerHTML=list.length?`<table><thead><tr><th>時刻</th><th>発車場所</th><th>系統</th><th></th></tr></thead><tbody>${list.map(t=>`<tr><td>${t.time}</td><td>${t.stop}</td><td>${t.route}</td><td><button class="btn" onclick="removeTrip('${t.id}')">削除</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">登録便なし</div>'}
-window.removeTrip=id=>{trips=trips.filter(t=>t.id!==id);save();renderAdmin()};
+function renderAdmin(){if(!ADMIN_UID||currentAuthUser?.id!==ADMIN_UID)return;const list=trips.filter(t=>t.stop===$("adminStop").value&&t.date===$("adminDate").value).sort((a,b)=>a.time.localeCompare(b.time));$("adminTrips").innerHTML=list.length?`<table><thead><tr><th>時刻</th><th>発車場所</th><th>系統</th><th></th></tr></thead><tbody>${list.map(t=>`<tr><td>${t.time.slice(0,5)}</td><td>${t.stop}</td><td>${t.route}</td><td><button class="btn" onclick="removeTrip('${t.id}')">削除</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">登録便なし</div>'}
+window.removeTrip=async id=>{
+ if(currentAuthUser?.id!==ADMIN_UID){$("adminMessage").textContent="管理者としてログインしてください。";return}
+ if(!confirm("この便を削除する？"))return;
+ const {error}=await authClient.from("trips").delete().eq("id",id);
+ if(error){$("adminMessage").textContent="削除できませんでした："+error.message;return}
+ trips=trips.filter(t=>t.id!==id);renderAdmin();refreshViews();
+};
 $("adminStop").addEventListener("change",renderAdmin);$("adminDate").addEventListener("change",renderAdmin);$("ttDate").addEventListener("change",renderTimetable);
-$("addTrip").addEventListener("click",()=>{const date=$("addDate").value,time=$("addTime").value,stop=$("addStop").value,route=$("addRoute").value;if(!date||!time||!route){$("adminMessage").textContent="日付と発車時刻を入力してね。";return}const info=routeMaster[route];trips.push({id:Date.now().toString()+Math.random().toString(16).slice(2),date,time,stop,route,displayDest:info?destinationFor(stop,route):"",via:info?viaFor(stop,route):""});save();$("adminMessage").textContent="登録したよ！";$("adminDate").value=date;$("adminStop").value=stop;renderAdmin();refreshViews()});
-$("copyTrips").addEventListener("click",()=>{const from=$("copyFrom").value,to=$("copyTo").value,stop=$("copyStop").value;if(!from||!to||from===to){alert("コピー元とコピー先に別の日付を指定してね。");return}const source=trips.filter(t=>t.stop===stop&&t.date===from);if(!source.length){alert("コピー元に便がありません。");return}const existing=trips.some(t=>t.stop===stop&&t.date===to);if(existing&&!confirm("コピー先にはすでに便があります。置き換えてコピーする？"))return;trips=trips.filter(t=>!(t.stop===stop&&t.date===to));source.forEach(t=>trips.push({...t,id:Date.now().toString()+Math.random().toString(16).slice(2),date:to}));save();alert(`${source.length}便をコピーしたよ！`);renderAdmin()});
+$("addTrip").addEventListener("click",async()=>{
+ const date=$("addDate").value,time=$("addTime").value,stop=$("addStop").value,route=$("addRoute").value;
+ if(!date||!time||!route){$("adminMessage").textContent="日付と発車時刻を入力してね。";return}
+ if(currentAuthUser?.id!==ADMIN_UID){$("adminMessage").textContent="管理者としてログインしてください。";return}
+ $("addTrip").disabled=true;$("adminMessage").textContent="登録中…";
+ const info=routeMaster[route];
+ const payload={date,time,stop,route,display_dest:info?destinationFor(stop,route):"",via:info?viaFor(stop,route):""};
+ const {data,error}=await authClient.from("trips").insert(payload).select().single();
+ $("addTrip").disabled=false;
+ if(error){$("adminMessage").textContent="登録できませんでした："+error.message;return}
+ trips.push(mapTrip(data));$("adminMessage").textContent="登録したよ！";$("adminDate").value=date;$("adminStop").value=stop;renderAdmin();refreshViews();
+});
+$("copyTrips").addEventListener("click",async()=>{
+ const from=$("copyFrom").value,to=$("copyTo").value,stop=$("copyStop").value;
+ if(!from||!to||from===to){alert("コピー元とコピー先に別の日付を指定してね。");return}
+ if(currentAuthUser?.id!==ADMIN_UID){alert("管理者としてログインしてください。");return}
+ const source=trips.filter(t=>t.stop===stop&&t.date===from);
+ if(!source.length){alert("コピー元に便がありません。");return}
+ const existing=trips.some(t=>t.stop===stop&&t.date===to);
+ if(existing&&!confirm("コピー先にはすでに便があります。置き換えてコピーする？"))return;
+ $("copyTrips").disabled=true;
+ try{
+  if(existing){
+   const {error:deleteError}=await authClient.from("trips").delete().eq("stop",stop).eq("date",to);
+   if(deleteError)throw deleteError;
+  }
+  const rows=source.map(t=>({date:to,time:t.time,stop:t.stop,route:t.route,display_dest:t.displayDest||"",via:t.via||""}));
+  const {error:insertError}=await authClient.from("trips").insert(rows);
+  if(insertError)throw insertError;
+  await loadTripsFromCloud();alert(source.length+"便をコピーしたよ！");
+ }catch(error){alert("コピーできませんでした："+error.message);await loadTripsFromCloud();}
+ $("copyTrips").disabled=false;
+});
 renderDepartures();renderTimetable();
+loadTripsFromCloud();
 setInterval(()=>{if(!$("departures").classList.contains("hidden"))renderDepartures();},60000);
 </script>
 </body></html>
