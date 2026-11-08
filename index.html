@@ -37,7 +37,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </head>
 <body>
 <header>
-  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">made by yachiP</span> <span class="version">v0.9</span></div>
+  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.1</span></div>
   <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
   <div class="sub" style="color:#c62828;font-weight:800">一時的に正門前発のバスのみ対応</div>
 </header>
@@ -79,15 +79,15 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </div></div>
   <div class="panel">
     <h2>このウェブサイトについて</h2>
-    <p class="muted">本ウェブサイトは、バスの時刻・発車情報を掲載する個人制作の非公式サイトです。バス事業者とは関係ありません。掲載情報は参考情報です。実際の運行については、必ず事業者の公式案内も確認してください。</p>
-    <p class="muted">制作・運営：yachiP</p>
+    <p class="muted">本ウェブサイトは、バスの時刻・発車情報を掲載する個人制作の非公式サイトです。バス事業者とは関係ありません。掲載情報は参考です。実際の運行については、バス事業者の情報を参照することをお勧めします。</p>
+    <p class="muted">制作・運営：やちP</p>
     <div class="actions"><button class="btn" id="adminLink">管理画面へ →</button></div>
   </div>
 </section>
 <section id="departures" class="hidden">
   <div class="panel">
     <h2>先発確認</h2>
-    <p class="muted">選択した発車場所から、本日現在時刻以降に出発する便を表示します。日付・系統・到着場所の絞り込みはありません。</p>
+    <p class="muted">選択した発車場所から、本日現在時刻以降に出発する便を表示します。</p>
     <div><label>発車場所</label><select id="depStop"></select></div>
     <div id="depResult"></div>
   </div>
