@@ -158,7 +158,8 @@ function destinationFor(stop,route){
  if(route==="臨時"||route==="スクールバス"){
   if(stop==="本八幡駅")return "市川学園・正門前";
   if(stop==="市川学園（本八幡）"||stop==="正門前（本八幡）")return "本八幡駅";
-  if(stop==="市川大野駅"||stop==="正門前（市川大野）")return "正門前／市川大野駅";
+  if(stop==="市川大野駅")return "正門前";
+  if(stop==="正門前（市川大野）")return "市川大野駅";
  }
  if(route==="路線バス")return stop==="市川学園（市川大野）"?"市川大野駅":"市川学園";
  if(route==="非経由便")return stop==="正門前（市川大野）"?"市川大野駅":"正門前";
