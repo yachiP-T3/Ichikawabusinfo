@@ -201,6 +201,7 @@ function updateAuthPanel(){
   }else if(currentAuthUser.id===ADMIN_UID){
     message.textContent="管理者としてログインしています。";
     $("adminTools").classList.remove("hidden");
+    renderAdmin();
   }else{
     message.textContent="このアカウントには管理者権限がありません。";
     $("adminTools").classList.add("hidden");
