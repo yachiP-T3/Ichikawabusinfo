@@ -255,10 +255,13 @@ function refreshViews(){renderDepartures();renderTimetable()}
 function renderDepartures(){
  if(!$("depStop").value)return;
  const selected=$("depStop").value;
- const list=filtered(selected,today(),null);
+ // 先発確認は日付を問わず登録便を検索し、現在時刻以降を優先する。
+ const list=filtered(selected,null,null);
  const now=new Date(),current=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
  const upcoming=list.filter(t=>t.time>=current);
- $("depResult").innerHTML=schoolToHachimanNotice(selected)+(upcoming.length?`<p class="muted">本日 ${current} 現在 · ${selected}</p><div style="display:flex;flex-direction:column;gap:10px">${upcoming.slice(0,5).map((t,i)=>`<div class="panel" style="margin:0;padding:14px 18px"><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="min-width:112px"><div class="bigtime">${t.time}</div><span class="pill">${i===0?"先発":i===1?"次発":i===2?"その次":`${i+1}番目`}</span></div><div style="flex:1;min-width:150px"><div class="pill">${displayRoute(t.route)||" "}</div><div style="font-size:17px;font-weight:800">${displayDestination(t)}</div><div class="muted">${(viaFor(t.stop,t.route)||t.via)?`経由：${viaFor(t.stop,t.route)||t.via}`:"経由地情報なし"}</div></div></div></div>`).join("")}</div>`:'<div class="empty">この発車場所から本日この先に出る便は登録されていません。管理画面で日付・発車場所・時刻を確認してね。</div>');
+ // 現在時刻以降の便がなくても、登録済み便から最も早い時刻を表示する。
+ const shown=upcoming.length?upcoming:list;
+ $("depResult").innerHTML=schoolToHachimanNotice(selected)+(shown.length?`<p class="muted">${current} 現在 · ${selected} · 日付を問わず登録便を表示</p><div style="display:flex;flex-direction:column;gap:10px">${shown.slice(0,5).map((t,i)=>`<div class="panel" style="margin:0;padding:14px 18px"><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="min-width:112px"><div class="bigtime">${t.time}</div><span class="pill">${i===0?"先発":i===1?"次発":i===2?"その次":`${i+1}番目`}</span></div><div style="flex:1;min-width:150px"><div class="pill">${displayRoute(t.route)||" "}</div><div style="font-size:17px;font-weight:800">${displayDestination(t)}</div><div class="muted">${(viaFor(t.stop,t.route)||t.via)?`経由：${viaFor(t.stop,t.route)||t.via}`:"経由地情報なし"}</div></div></div></div>`).join("")}</div>`:'<div class="empty">この発車場所には登録便がありません。管理画面から便を登録してね。</div>');
 }
 function renderTimetable(){if(!$("ttStop").value)return;const list=filtered($("ttStop").value,$("ttDate").value,$("ttRoute").value);$("ttResult").innerHTML=schoolToHachimanNotice($("ttStop").value)+(list.length?`<table><thead><tr><th>発車時刻</th><th>系統</th><th>行先</th><th>経由</th></tr></thead><tbody>${list.map(t=>`<tr><td><b>${t.time}</b></td><td>${displayRoute(t.route)||"—"}</td><td>${displayDestination(t)}</td><td>${viaFor(t.stop,t.route)||t.via||"—"}</td></tr>`).join("")}</tbody></table>`:'<div class="empty">この条件の便はまだ登録されていません。</div>');
 }
