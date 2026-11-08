@@ -185,7 +185,7 @@ $("addRoute").addEventListener("change",fillRouteDetails);
 function destinationFor(stop,route){
  if(route==="系統なし")return stop==="市川学園（市川駅）"?"市川駅":"";
  if(route==="路線バス")return stop==="市川大野駅"?"本八幡駅":"市川大野駅方面";
- if(["13","14","15"].includes(route)&&stop==="市川大野駅")return "市川学園";
+ if(["13","14","15"].includes(route)&&stop==="市川大野駅")return "本八幡駅";
  if(route==="臨時"||route==="スクールバス"){
   if(stop==="本八幡駅")return "正門前";
   if(stop==="市川学園（本八幡）"||stop==="正門前（本八幡）")return "本八幡駅";
@@ -202,6 +202,10 @@ function destinationFor(stop,route){
  return info.ends[0]||"";
 }
 function viaFor(stop,route){
+ // 市川大野駅発の13/14/15は本八幡駅行、経由は京成八幡駅。
+ if(stop==="市川大野駅"&&["13","14","15"].includes(route))return "京成八幡駅";
+ // 学園（本八幡）発の11/12〜16はすべて京成八幡駅経由。
+ if(stop==="市川学園（本八幡）"&&["11/12","13","14","15","16"].includes(route))return "京成八幡駅";
  if(route==="14")return "京成八幡駅・市川大野駅　大野町四丁目回り";
  if(route==="臨時"||route==="スクールバス"){
   if(stop==="本八幡駅"||stop==="正門前（本八幡）"||stop==="市川学園（本八幡）")return "京成八幡駅";
