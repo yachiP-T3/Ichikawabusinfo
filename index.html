@@ -8,7 +8,7 @@
 :root{--blue:#32a9d6;--blue-bg:#eaf8fd;--orange:#ed963b;--orange-bg:#fff4e8;--green:#83b83e;--green-bg:#f2f9e9;--ink:#17212b;--muted:#667585;--line:#e3e9ef;--bg:#f5f8fb}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Yu Gothic","游ゴシック体","YuGothic",Meiryo,sans-serif;font-weight:700}
 header{background:white;border-bottom:1px solid var(--line);padding:22px max(20px,calc((100% - 1000px)/2))}
-.brand{font-size:clamp(22px,4vw,30px);font-weight:800;letter-spacing:.01em;cursor:pointer}.brand:hover{opacity:.78}.sub{color:var(--muted);font-size:13px;margin-top:5px}
+.brand{font-size:clamp(22px,4vw,30px);font-weight:800;letter-spacing:.01em;cursor:pointer}.brand:hover{opacity:.78}.version{font-size:.55em;font-weight:700;color:var(--muted);margin-left:7px;vertical-align:middle}.sub{color:var(--muted);font-size:13px;margin-top:5px}
 nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
 nav button,.btn{border:1px solid var(--line);background:white;color:var(--ink);padding:10px 14px;border-radius:10px;font-weight:650;cursor:pointer;font-family:inherit}
 nav button.active,.btn.primary{background:#1769aa;color:white;border-color:#1769aa}
@@ -37,7 +37,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </head>
 <body>
 <header>
-  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">feat. yachiP</span></div>
+  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">feat. yachiP</span> <span class="version">v0.8</span></div>
   <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
 </header>
 <main>
