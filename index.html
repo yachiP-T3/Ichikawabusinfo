@@ -142,7 +142,7 @@ const stationRoutes={
  "市川学園（本八幡）":["11/12","13","14","15","16","71","74","臨時","スクールバス"],
  "市川学園（市川大野）":["路線バス"],
  "正門前（本八幡）":["16","74","臨時","スクールバス"],
- "正門前（市川大野）":["路線バス","臨時","スクールバス"],
+ "正門前（市川大野）":["臨時","スクールバス"],
  "正門前（西船橋）":["一般","貸切"],
  "市川学園（市川駅）":["系統なし"],
  };
@@ -184,22 +184,30 @@ $("addStop").addEventListener("change",()=>{fillRoute("addStop","addRoute",false
 $("addRoute").addEventListener("change",fillRouteDetails);
 function destinationFor(stop,route){
  if(route==="系統なし")return stop==="市川学園（市川駅）"?"市川駅":"";
- if(route==="路線バス")return "市川大野駅方面";
+ if(route==="路線バス")return stop==="市川大野駅"?"本八幡駅":"市川大野駅方面";
  if(["13","14","15"].includes(route)&&stop==="市川大野駅")return "市川学園";
  if(route==="臨時"||route==="スクールバス"){
-  if(stop==="本八幡駅")return "市川学園・正門前";
+  if(stop==="本八幡駅")return "正門前";
   if(stop==="市川学園（本八幡）"||stop==="正門前（本八幡）")return "本八幡駅";
   if(stop==="市川大野駅")return "正門前";
    }
   const info=routeMaster[route];if(!info)return "";
  if(stop==="本八幡駅")return route==="16"||route==="74"?"正門前":route==="15"?"動植物園":"医療センター入口";
- if(stop==="市川大野駅")return route==="非経由便"?"正門前":"市川学園";
+ if(stop==="市川大野駅")return "市川学園";
  if(stop==="西船橋駅")return "正門前";
  if(stop==="市川学園（本八幡）")return "本八幡駅";
  if(stop==="市川学園（市川大野）")return "市川大野駅方面";
  if(stop==="正門前（本八幡）")return "本八幡駅";
   if(stop==="正門前（西船橋）")return "西船橋駅";
  return info.ends[0]||"";
+}
+function viaFor(stop,route){
+ if(route==="14")return "京成八幡駅・市川大野駅　大野町四丁目回り";
+ if(route==="臨時"||route==="スクールバス"){
+  if(stop==="本八幡駅"||stop==="正門前（本八幡）"||stop==="市川学園（本八幡）")return "京成八幡駅";
+  if(stop==="市川大野駅"||stop==="正門前（市川大野）")return "無停車";
+ }
+ return routeMaster[route]?.via||"";
 }
 function displayRoute(route){return /^\d/.test(route)?"本"+route:route==="系統なし"?"":route;}
 function displayDestination(t){const d=(routeMaster[t.route]&&destinationFor(t.stop,t.route))||t.displayDest||t.dest||"—";return d;}
@@ -208,7 +216,7 @@ function fillRouteDetails(){
  const stop=$("addStop").value, route=$("addRoute").value;
  const info=routeMaster[route];
  $("addDisplayDest").value=info?destinationFor(stop,route):"";
- $("addVia").value=info?info.via:"";
+ $("addVia").value=info?viaFor(stop,route):"";
 }
 options("adminStop",places);options("copyStop",places);
 ["ttDate","addDate","adminDate","copyFrom","copyTo"].forEach(id=>$(id).value=today());
@@ -250,15 +258,15 @@ function renderDepartures(){
  const list=filtered(selected,today(),null);
  const now=new Date(),current=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
  const upcoming=list.filter(t=>t.time>=current);
- $("depResult").innerHTML=schoolToHachimanNotice(selected)+(upcoming.length?`<p class="muted">本日 ${current} 現在 · ${selected}</p><div style="display:flex;flex-direction:column;gap:10px">${upcoming.slice(0,5).map((t,i)=>`<div class="panel" style="margin:0;padding:14px 18px"><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="min-width:112px"><div class="bigtime">${t.time}</div><span class="pill">${i===0?"先発":i===1?"次発":i===2?"その次":`${i+1}番目`}</span></div><div style="flex:1;min-width:150px"><div class="pill">${displayRoute(t.route)||" "}</div><div style="font-size:17px;font-weight:800">${displayDestination(t)}</div><div class="muted">${(routeMaster[t.route]?.via||t.via)?`経由：${routeMaster[t.route]?.via||t.via}`:"経由地情報なし"}</div></div></div></div>`).join("")}</div>`:'<div class="empty">この発車場所から本日この先に出る便は登録されていません。管理画面で日付・発車場所・時刻を確認してね。</div>');
+ $("depResult").innerHTML=schoolToHachimanNotice(selected)+(upcoming.length?`<p class="muted">本日 ${current} 現在 · ${selected}</p><div style="display:flex;flex-direction:column;gap:10px">${upcoming.slice(0,5).map((t,i)=>`<div class="panel" style="margin:0;padding:14px 18px"><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="min-width:112px"><div class="bigtime">${t.time}</div><span class="pill">${i===0?"先発":i===1?"次発":i===2?"その次":`${i+1}番目`}</span></div><div style="flex:1;min-width:150px"><div class="pill">${displayRoute(t.route)||" "}</div><div style="font-size:17px;font-weight:800">${displayDestination(t)}</div><div class="muted">${(viaFor(t.stop,t.route)||t.via)?`経由：${viaFor(t.stop,t.route)||t.via}`:"経由地情報なし"}</div></div></div></div>`).join("")}</div>`:'<div class="empty">この発車場所から本日この先に出る便は登録されていません。管理画面で日付・発車場所・時刻を確認してね。</div>');
 }
-function renderTimetable(){if(!$("ttStop").value)return;const list=filtered($("ttStop").value,$("ttDate").value,$("ttRoute").value);$("ttResult").innerHTML=schoolToHachimanNotice($("ttStop").value)+(list.length?`<table><thead><tr><th>発車時刻</th><th>系統</th><th>行先</th><th>経由</th></tr></thead><tbody>${list.map(t=>`<tr><td><b>${t.time}</b></td><td>${displayRoute(t.route)||"—"}</td><td>${displayDestination(t)}</td><td>${t.via||routeMaster[t.route]?.via||"—"}</td></tr>`).join("")}</tbody></table>`:'<div class="empty">この条件の便はまだ登録されていません。</div>');
+function renderTimetable(){if(!$("ttStop").value)return;const list=filtered($("ttStop").value,$("ttDate").value,$("ttRoute").value);$("ttResult").innerHTML=schoolToHachimanNotice($("ttStop").value)+(list.length?`<table><thead><tr><th>発車時刻</th><th>系統</th><th>行先</th><th>経由</th></tr></thead><tbody>${list.map(t=>`<tr><td><b>${t.time}</b></td><td>${displayRoute(t.route)||"—"}</td><td>${displayDestination(t)}</td><td>${viaFor(t.stop,t.route)||t.via||"—"}</td></tr>`).join("")}</tbody></table>`:'<div class="empty">この条件の便はまだ登録されていません。</div>');
 }
 
 function renderAdmin(){const list=trips.filter(t=>t.stop===$("adminStop").value&&t.date===$("adminDate").value).sort((a,b)=>a.time.localeCompare(b.time));$("adminTrips").innerHTML=list.length?`<table><thead><tr><th>時刻</th><th>発車場所</th><th>系統</th><th></th></tr></thead><tbody>${list.map(t=>`<tr><td>${t.time}</td><td>${t.stop}</td><td>${t.route}</td><td><button class="btn" onclick="removeTrip('${t.id}')">削除</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">登録便なし</div>'}
 window.removeTrip=id=>{trips=trips.filter(t=>t.id!==id);save();renderAdmin()};
 $("adminStop").addEventListener("change",renderAdmin);$("adminDate").addEventListener("change",renderAdmin);$("ttDate").addEventListener("change",renderTimetable);
-$("addTrip").addEventListener("click",()=>{const date=$("addDate").value,time=$("addTime").value,stop=$("addStop").value,route=$("addRoute").value;if(!date||!time||!route){$("adminMessage").textContent="日付と発車時刻を入力してね。";return}const info=routeMaster[route];trips.push({id:Date.now().toString()+Math.random().toString(16).slice(2),date,time,stop,route,displayDest:info?destinationFor(stop,route):"",via:info?info.via:""});save();$("adminMessage").textContent="登録したよ！";$("adminDate").value=date;$("adminStop").value=stop;renderAdmin();refreshViews()});
+$("addTrip").addEventListener("click",()=>{const date=$("addDate").value,time=$("addTime").value,stop=$("addStop").value,route=$("addRoute").value;if(!date||!time||!route){$("adminMessage").textContent="日付と発車時刻を入力してね。";return}const info=routeMaster[route];trips.push({id:Date.now().toString()+Math.random().toString(16).slice(2),date,time,stop,route,displayDest:info?destinationFor(stop,route):"",via:info?viaFor(stop,route):""});save();$("adminMessage").textContent="登録したよ！";$("adminDate").value=date;$("adminStop").value=stop;renderAdmin();refreshViews()});
 $("copyTrips").addEventListener("click",()=>{const from=$("copyFrom").value,to=$("copyTo").value,stop=$("copyStop").value;if(!from||!to||from===to){alert("コピー元とコピー先に別の日付を指定してね。");return}const source=trips.filter(t=>t.stop===stop&&t.date===from);if(!source.length){alert("コピー元に便がありません。");return}const existing=trips.some(t=>t.stop===stop&&t.date===to);if(existing&&!confirm("コピー先にはすでに便があります。置き換えてコピーする？"))return;trips=trips.filter(t=>!(t.stop===stop&&t.date===to));source.forEach(t=>trips.push({...t,id:Date.now().toString()+Math.random().toString(16).slice(2),date:to}));save();alert(`${source.length}便をコピーしたよ！`);renderAdmin()});
 renderDepartures();renderTimetable();renderAdmin();
 setInterval(()=>{if(!$("departures").classList.contains("hidden"))renderDepartures();},60000);
