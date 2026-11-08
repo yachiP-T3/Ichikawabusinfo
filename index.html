@@ -42,8 +42,40 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </header>
 <main>
 <section id="home">
-  <div class="panel"><h2>先発確認 / 運行情報</h2><div class="home-matrix" id="depMatrix"></div></div>
-  <div class="panel"><h2>時刻表確認</h2><div class="home-matrix" id="timeMatrix"></div></div>
+  <div class="panel"><h2>先発確認 / 運行情報</h2><div class="home-matrix" id="depMatrix">
+  <div class="home-group"><h3 class="home-heading">各駅 → 市川学園</h3>
+    <button class="home-button route-hachiman" data-stop="本八幡駅">本八幡駅 発</button>
+    <button class="home-button route-ono" data-stop="市川大野駅">市川大野駅 発</button>
+    <button class="home-button route-funabashi" data-stop="西船橋駅">西船橋駅 発</button>
+  </div>
+  <div class="home-group"><h3 class="home-heading">正門前 → 各駅</h3>
+    <button class="home-button route-hachiman" data-stop="正門前（本八幡）">本八幡駅 方面</button>
+    <button class="home-button route-ono" data-stop="正門前（市川大野）">市川大野駅 方面</button>
+    <button class="home-button route-funabashi" data-stop="正門前（西船橋）">西船橋駅 方面</button>
+  </div>
+  <div class="home-group"><h3 class="home-heading">市川学園 → 各駅</h3>
+    <button class="home-button route-hachiman" data-stop="市川学園（本八幡）">本八幡駅 方面</button>
+    <button class="home-button route-ono" data-stop="市川学園（市川大野）">市川大野駅 方面</button>
+    <button class="home-button route-ichikawa" data-stop="市川学園（市川駅）">市川駅 方面</button>
+  </div>
+</div></div>
+  <div class="panel"><h2>時刻表確認</h2><div class="home-matrix" id="timeMatrix">
+  <div class="home-group"><h3 class="home-heading">各駅 → 市川学園</h3>
+    <button class="home-button route-hachiman" data-stop="本八幡駅">本八幡駅 発</button>
+    <button class="home-button route-ono" data-stop="市川大野駅">市川大野駅 発</button>
+    <button class="home-button route-funabashi" data-stop="西船橋駅">西船橋駅 発</button>
+  </div>
+  <div class="home-group"><h3 class="home-heading">正門前 → 各駅</h3>
+    <button class="home-button route-hachiman" data-stop="正門前（本八幡）">本八幡駅 方面</button>
+    <button class="home-button route-ono" data-stop="正門前（市川大野）">市川大野駅 方面</button>
+    <button class="home-button route-funabashi" data-stop="正門前（西船橋）">西船橋駅 方面</button>
+  </div>
+  <div class="home-group"><h3 class="home-heading">市川学園 → 各駅</h3>
+    <button class="home-button route-hachiman" data-stop="市川学園（本八幡）">本八幡駅 方面</button>
+    <button class="home-button route-ono" data-stop="市川学園（市川大野）">市川大野駅 方面</button>
+    <button class="home-button route-ichikawa" data-stop="市川学園（市川駅）">市川駅 方面</button>
+  </div>
+</div></div>
   <div class="panel">
     <h2>このウェブサイトについて</h2>
     <p class="muted">本ウェブサイトは、バスの時刻・発車情報を掲載する個人制作の非公式サイトです。バス事業者とは関係ありません。掲載情報は参考情報です。実際の運行については、必ず事業者の公式案内も確認してください。</p>
@@ -136,7 +168,7 @@ const campusStops=new Set(["市川学園（本八幡）","市川学園（市川�
 const colourFor=(stop)=>stop.includes("市川駅")?"ichikawa":stop.includes("本八幡")?"hachiman":stop.includes("市川大野")?"ono":"funabashi";
 const $=id=>document.getElementById(id);
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
-let trips=JSON.parse(localStorage.getItem("yachipBusTripsV2")||"[]");
+let trips=[];try{trips=JSON.parse(localStorage.getItem("yachipBusTripsV2")||"[]");if(!Array.isArray(trips))trips=[];}catch(e){trips=[];}
 // 旧版で「市川学園」として保存された便を、系統に応じた個別停留所へ移行する。
 const legacyStopForRoute={"11/12":"市川学園（本八幡）","13":"市川学園（市川大野）","14":"市川学園（市川大野）","15":"市川学園（市川大野）","16":"正門前（本八幡）","71":"市川学園（本八幡）","74":"正門前（本八幡）","一般":"正門前（西船橋）","貸切":"正門前（西船橋）","市61":"市川学園（市川駅）","非経由便":"正門前（市川大野）"};
 let migrated=false;
