@@ -32,12 +32,13 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 .muted{color:var(--muted);font-size:13px;font-weight:500}.empty{padding:22px;text-align:center;color:var(--muted);background:#f8fafc;border-radius:10px}
 .notice{padding:12px 14px;background:#fff8e8;border:1px solid #f2dfb4;border-radius:10px;font-size:13px;line-height:1.6}
 .hidden{display:none!important}.bigtime{font-size:29px;font-weight:850;margin-top:7px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,18px);opacity:0;pointer-events:none;background:#17212b;color:#fff;padding:13px 20px;border-radius:12px;box-shadow:0 6px 24px #0003;font-size:14px;font-weight:800;z-index:9999;transition:opacity .22s ease,transform .22s ease;max-width:calc(100vw - 32px);text-align:center}#toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:600px){header{padding:18px}.panel{padding:16px}main{margin-top:18px}.linkcard{gap:6px}.place{font-size:14px}}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.6</span></div>
+  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.7</span></div>
   <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
   <div class="sub" style="color:#c62828;font-weight:800">一時的に正門前発のバスのみ対応</div>
 </header>
@@ -140,6 +141,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
   </div>
 </section>
 </main>
+<div id="toast" role="status" aria-live="polite"></div>
 <footer style="max-width:1000px;margin:0 auto;padding:0 18px 30px;color:#667585;font-size:12px">© yachiP · 試作版</footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -178,6 +180,8 @@ const routeMaster={
 const campusStops=new Set(["市川学園（本八幡）","市川学園（市川大野）","正門前（本八幡）","正門前（市川大野）","正門前（西船橋）","市川学園（市川駅）"]);
 const colourFor=(stop)=>stop.includes("本八幡")?"hachiman":stop.includes("市川大野")?"ono":"funabashi";
 const $=id=>document.getElementById(id);
+let toastTimer=null;
+function showToast(message){const el=$("toast");if(!el)return;el.textContent=message;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2600);}
 const SUPABASE_URL = "https://phpaljpoxsuzxwwkoipj.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_58zOYZ-WbC6vHVgiwhREew_ZZmK_Ftw";
 const ADMIN_UID = "9a1ed85a-411f-4b90-b023-c21556cea970";
@@ -412,7 +416,7 @@ $("addTrip").addEventListener("click",async()=>{
  const {data,error}=await authClient.from("trips").insert(payload).select().single();
  $("addTrip").disabled=false;
  if(error){$("adminMessage").textContent="登録できませんでした："+error.message;return}
- trips.push(mapTrip(data));$("adminMessage").textContent="登録したよ！";$("adminDate").value=date;$("adminStop").value=stop;renderAdmin();refreshViews();
+ trips.push(mapTrip(data));$("adminMessage").textContent="";$("adminDate").value=date;$("adminStop").value=stop;renderAdmin();refreshViews();showToast("便を登録したよ！");
 });
 $("copyTrips").addEventListener("click",async()=>{
  const from=$("copyFrom").value,to=$("copyTo").value,stop=$("copyStop").value;
@@ -431,7 +435,7 @@ $("copyTrips").addEventListener("click",async()=>{
   const rows=source.map(t=>({date:to,time:t.time,stop:t.stop,route:t.route,display_dest:t.displayDest||"",via:t.via||""}));
   const {error:insertError}=await authClient.from("trips").insert(rows);
   if(insertError)throw insertError;
-  await loadTripsFromCloud();alert(source.length+"便をコピーしたよ！");
+  await loadTripsFromCloud();showToast(source.length+"便をコピーしたよ！");
  }catch(error){alert("コピーできませんでした："+error.message);await loadTripsFromCloud();}
  $("copyTrips").disabled=false;
 });
