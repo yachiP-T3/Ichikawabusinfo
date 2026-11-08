@@ -99,6 +99,17 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
   </div>
 </section>
 <section id="admin" class="hidden">
+  <div class="panel" id="adminGate">
+    <h2>管理者ログイン</h2>
+    <p class="muted">管理画面を利用するには、管理者のGitHubアカウントでログインしてください。</p>
+    <div class="actions">
+      <button class="btn primary" id="githubLogin">GitHubでログイン</button>
+      <button class="btn hidden" id="githubLogout">ログアウト</button>
+    </div>
+    <div id="authMessage" class="muted" style="margin-top:12px" aria-live="polite">ログイン状態を確認しています…</div>
+    <div id="authIdentity" class="notice hidden" style="margin-top:12px;overflow-wrap:anywhere"></div>
+  </div>
+  <div id="adminTools" class="hidden">
   <div class="panel">
     <h2>管理画面</h2>
     <div class="notice">この試作品はブラウザ内（localStorage）にデータを保存するデモです。同じ端末・同じブラウザでのみ引き継がれ、公開サイトとは同期しません。発車場所は方面ごとに別の停留所として登録します。</div>
@@ -125,9 +136,11 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
     <div class="actions"><button class="btn" id="copyTrips">この発車場所の便をコピー</button></div>
     <p class="muted">コピー先に既存の便がある場合は、上書き確認を表示します。コピー後は別々に編集できます。</p>
   </div>
+  </div>
 </section>
 </main>
 <footer style="max-width:1000px;margin:0 auto;padding:0 18px 30px;color:#667585;font-size:12px">© yachiP · 試作版</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // 発車場所そのものを識別子として管理する。到着場所の項目・絞り込みは使用しない。
 const places=[
@@ -164,6 +177,53 @@ const routeMaster={
 const campusStops=new Set(["市川学園（本八幡）","市川学園（市川大野）","正門前（本八幡）","正門前（市川大野）","正門前（西船橋）","市川学園（市川駅）"]);
 const colourFor=(stop)=>stop.includes("本八幡")?"hachiman":stop.includes("市川大野")?"ono":"funabashi";
 const $=id=>document.getElementById(id);
+const SUPABASE_URL = "https://phpaljpoxsuzxwwkoipj.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_58zOYZ-WbC6vHVgiwhREew_ZZmK_Ftw";
+const ADMIN_UID = "";
+const authClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+let currentAuthUser = null;
+function updateAuthPanel(){
+  const login=$("githubLogin"), logout=$("githubLogout"), identity=$("authIdentity"), message=$("authMessage");
+  if(!login||!logout||!identity||!message)return;
+  if(!currentAuthUser){
+    login.classList.remove("hidden");logout.classList.add("hidden");identity.classList.add("hidden");
+    message.textContent="未ログインです。GitHubでログインしてください。";
+    $("adminTools").classList.add("hidden");return;
+  }
+  login.classList.add("hidden");logout.classList.remove("hidden");
+  const meta=currentAuthUser.user_metadata||{};
+  const username=meta.user_name||meta.preferred_username||meta.name||"GitHubアカウント";
+  identity.classList.remove("hidden");
+  identity.textContent="ログイン中："+username+" ／ UUID："+currentAuthUser.id;
+  if(!ADMIN_UID){
+    message.textContent="ログイン成功！このUUIDを管理者設定に登録するまで、編集機能はロックされています。UUIDをこのチャットに送ってね。";
+    $("adminTools").classList.add("hidden");
+  }else if(currentAuthUser.id===ADMIN_UID){
+    message.textContent="管理者としてログインしています。";
+    $("adminTools").classList.remove("hidden");
+  }else{
+    message.textContent="このアカウントには管理者権限がありません。";
+    $("adminTools").classList.add("hidden");
+  }
+}
+async function refreshAuthState(){
+  const {data,error}=await authClient.auth.getSession();
+  if(error){$("authMessage").textContent="ログイン状態を確認できませんでした："+error.message;return;}
+  currentAuthUser=data.session?.user||null;updateAuthPanel();
+}
+$("githubLogin").addEventListener("click",async()=>{
+  $("authMessage").textContent="GitHubへ移動しています…";
+  const {error}=await authClient.auth.signInWithOAuth({provider:"github",options:{redirectTo:window.location.origin+window.location.pathname}});
+  if(error)$("authMessage").textContent="ログインを開始できませんでした："+error.message;
+});
+$("githubLogout").addEventListener("click",async()=>{
+  const {error}=await authClient.auth.signOut();
+  if(error){$("authMessage").textContent="ログアウトできませんでした："+error.message;return;}
+  currentAuthUser=null;updateAuthPanel();
+});
+authClient.auth.onAuthStateChange((_event,session)=>{currentAuthUser=session?.user||null;updateAuthPanel();});
+refreshAuthState();
+
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 let trips=[];try{trips=JSON.parse(localStorage.getItem("yachipBusTripsV2")||"[]");if(!Array.isArray(trips))trips=[];}catch(e){trips=[];}
 // 旧版で「市川学園」として保存された便を、系統に応じた個別停留所へ移行する。
@@ -225,7 +285,7 @@ function fillRouteDetails(){
 options("adminStop",places);options("copyStop",places);
 ["ttDate","addDate","adminDate","copyFrom","copyTo"].forEach(id=>$(id).value=today());
 fillRouteDetails();
-function go(page){document.querySelectorAll("main>section").forEach(x=>x.classList.add("hidden"));$(page).classList.remove("hidden");if(page==="departures")renderDepartures();if(page==="timetable")renderTimetable();if(page==="admin")renderAdmin();window.scrollTo(0,0)}
+function go(page){document.querySelectorAll("main>section").forEach(x=>x.classList.add("hidden"));$(page).classList.remove("hidden");if(page==="departures")renderDepartures();if(page==="timetable")renderTimetable();if(page==="admin")refreshAuthState();window.scrollTo(0,0)}
 $("homeTitle").addEventListener("click",()=>go("home"));
 $("homeTitle").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go("home")}});
 $("adminLink").addEventListener("click",()=>go("admin"));
@@ -278,12 +338,12 @@ function renderDepartures(){
 function renderTimetable(){if(!$("ttStop").value)return;const list=filtered($("ttStop").value,$("ttDate").value,$("ttRoute").value);$("ttResult").innerHTML=schoolToHachimanNotice($("ttStop").value)+(list.length?`<table><thead><tr><th>発車時刻</th><th>系統</th><th>行先</th><th>経由</th></tr></thead><tbody>${list.map(t=>`<tr><td><b>${t.time}</b></td><td>${displayRoute(t.route)||"—"}</td><td>${displayDestination(t)}</td><td>${viaFor(t.stop,t.route)||t.via||"—"}</td></tr>`).join("")}</tbody></table>`:'<div class="empty">この条件の便はまだ登録されていません。</div>');
 }
 
-function renderAdmin(){const list=trips.filter(t=>t.stop===$("adminStop").value&&t.date===$("adminDate").value).sort((a,b)=>a.time.localeCompare(b.time));$("adminTrips").innerHTML=list.length?`<table><thead><tr><th>時刻</th><th>発車場所</th><th>系統</th><th></th></tr></thead><tbody>${list.map(t=>`<tr><td>${t.time}</td><td>${t.stop}</td><td>${t.route}</td><td><button class="btn" onclick="removeTrip('${t.id}')">削除</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">登録便なし</div>'}
+function renderAdmin(){if(!ADMIN_UID||currentAuthUser?.id!==ADMIN_UID)return;const list=trips.filter(t=>t.stop===$("adminStop").value&&t.date===$("adminDate").value).sort((a,b)=>a.time.localeCompare(b.time));$("adminTrips").innerHTML=list.length?`<table><thead><tr><th>時刻</th><th>発車場所</th><th>系統</th><th></th></tr></thead><tbody>${list.map(t=>`<tr><td>${t.time}</td><td>${t.stop}</td><td>${t.route}</td><td><button class="btn" onclick="removeTrip('${t.id}')">削除</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">登録便なし</div>'}
 window.removeTrip=id=>{trips=trips.filter(t=>t.id!==id);save();renderAdmin()};
 $("adminStop").addEventListener("change",renderAdmin);$("adminDate").addEventListener("change",renderAdmin);$("ttDate").addEventListener("change",renderTimetable);
 $("addTrip").addEventListener("click",()=>{const date=$("addDate").value,time=$("addTime").value,stop=$("addStop").value,route=$("addRoute").value;if(!date||!time||!route){$("adminMessage").textContent="日付と発車時刻を入力してね。";return}const info=routeMaster[route];trips.push({id:Date.now().toString()+Math.random().toString(16).slice(2),date,time,stop,route,displayDest:info?destinationFor(stop,route):"",via:info?viaFor(stop,route):""});save();$("adminMessage").textContent="登録したよ！";$("adminDate").value=date;$("adminStop").value=stop;renderAdmin();refreshViews()});
 $("copyTrips").addEventListener("click",()=>{const from=$("copyFrom").value,to=$("copyTo").value,stop=$("copyStop").value;if(!from||!to||from===to){alert("コピー元とコピー先に別の日付を指定してね。");return}const source=trips.filter(t=>t.stop===stop&&t.date===from);if(!source.length){alert("コピー元に便がありません。");return}const existing=trips.some(t=>t.stop===stop&&t.date===to);if(existing&&!confirm("コピー先にはすでに便があります。置き換えてコピーする？"))return;trips=trips.filter(t=>!(t.stop===stop&&t.date===to));source.forEach(t=>trips.push({...t,id:Date.now().toString()+Math.random().toString(16).slice(2),date:to}));save();alert(`${source.length}便をコピーしたよ！`);renderAdmin()});
-renderDepartures();renderTimetable();renderAdmin();
+renderDepartures();renderTimetable();
 setInterval(()=>{if(!$("departures").classList.contains("hidden"))renderDepartures();},60000);
 </script>
 </body></html>
