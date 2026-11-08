@@ -56,7 +56,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
   <div class="home-group"><h3 class="home-heading">市川学園 → 各駅</h3>
     <button class="home-button route-hachiman" data-stop="市川学園（本八幡）">本八幡駅 方面</button>
     <button class="home-button route-ono" data-stop="市川学園（市川大野）">市川大野駅 方面</button>
-    <button class="home-button route-ichikawa" data-stop="市川学園（市川駅）">市川駅 方面</button>
+    
   </div>
 </div></div>
   <div class="panel"><h2>時刻表確認</h2><div class="home-matrix" id="timeMatrix">
@@ -73,7 +73,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
   <div class="home-group"><h3 class="home-heading">市川学園 → 各駅</h3>
     <button class="home-button route-hachiman" data-stop="市川学園（本八幡）">本八幡駅 方面</button>
     <button class="home-button route-ono" data-stop="市川学園（市川大野）">市川大野駅 方面</button>
-    <button class="home-button route-ichikawa" data-stop="市川学園（市川駅）">市川駅 方面</button>
+    
   </div>
 </div></div>
   <div class="panel">
@@ -134,20 +134,17 @@ const places=[
  "本八幡駅","市川大野駅","西船橋駅",
  "市川学園（本八幡）","市川学園（市川大野）",
  "正門前（本八幡）","正門前（市川大野）","正門前（西船橋）",
- "市川学園（市川駅）","市川駅"
-];
+ ];
 const stationRoutes={
  "本八幡駅":["11/12","13","14","15","16","71","74","臨時","スクールバス"],
  "市川大野駅":["13","14","15","非経由便","臨時","スクールバス"],
  "西船橋駅":["一般","貸切"],
  "市川学園（本八幡）":["11/12","13","14","15","16","71","74","臨時","スクールバス"],
- "市川学園（市川大野）":["13","14","15","路線バス","スクールバス","臨時"],
+ "市川学園（市川大野）":["路線バス","スクールバス","臨時"],
  "正門前（本八幡）":["16","74","臨時","スクールバス"],
- "正門前（市川大野）":["非経由便","臨時","スクールバス"],
+ "正門前（市川大野）":["臨時","スクールバス"],
  "正門前（西船橋）":["一般","貸切"],
- "市川学園（市川駅）":["系統なし"],
- "市川駅":[]
-};
+ };
 const routeMaster={
  "11/12":{ends:["本八幡駅","医療センター入口"],via:"京成八幡駅（市川大野には行かない）"},
  "13":{ends:["本八幡駅","医療センター入口"],via:"京成八幡駅・市川大野駅"},
@@ -157,23 +154,21 @@ const routeMaster={
  "71":{ends:["本八幡駅","医療センター入口"],via:"鬼越駅"},
  "74":{ends:["本八幡駅","正門前"],via:"鬼越駅"},
  "路線バス":{ends:["市川大野駅","市川学園"],via:""},
- "非経由便":{ends:["市川大野駅","正門前"],via:""},
  "臨時":{ends:[],via:""},
  "スクールバス":{ends:[],via:""},
  "一般":{ends:["西船橋駅","正門前"],via:"東中山駅停車"},
  "貸切":{ends:["西船橋駅","正門前"],via:"無停車"},
- "系統なし":{ends:["市川学園","市川駅"],via:""}
-};
-const campusStops=new Set(["市川学園（本八幡）","市川学園（市川大野）","正門前（本八幡）","正門前（市川大野）","正門前（西船橋）","市川学園（市川駅）"]);
-const colourFor=(stop)=>stop.includes("市川駅")?"ichikawa":stop.includes("本八幡")?"hachiman":stop.includes("市川大野")?"ono":"funabashi";
+ };
+const campusStops=new Set(["市川学園（本八幡）","市川学園（市川大野）","正門前（本八幡）","正門前（市川大野）","正門前（西船橋）"]);
+const colourFor=(stop)=>stop.includes("本八幡")?"hachiman":stop.includes("市川大野")?"ono":"funabashi";
 const $=id=>document.getElementById(id);
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 let trips=[];try{trips=JSON.parse(localStorage.getItem("yachipBusTripsV2")||"[]");if(!Array.isArray(trips))trips=[];}catch(e){trips=[];}
 // 旧版で「市川学園」として保存された便を、系統に応じた個別停留所へ移行する。
-const legacyStopForRoute={"11/12":"市川学園（本八幡）","13":"市川学園（市川大野）","14":"市川学園（市川大野）","15":"市川学園（市川大野）","16":"正門前（本八幡）","71":"市川学園（本八幡）","74":"正門前（本八幡）","一般":"正門前（西船橋）","貸切":"正門前（西船橋）","系統なし":"市川学園（市川駅）","非経由便":"正門前（市川大野）"};
+const legacyStopForRoute={"11/12":"市川学園（本八幡）","13":"市川学園（市川大野）","14":"市川学園（市川大野）","15":"市川学園（市川大野）","16":"正門前（本八幡）","71":"市川学園（本八幡）","74":"正門前（本八幡）","一般":"正門前（西船橋）","貸切":"正門前（西船橋）",};
 let migrated=false;
 trips=trips.map(t=>{if(t.stop==="市川学園"){migrated=true;return {...t,stop:legacyStopForRoute[t.route]||"市川学園（本八幡）"}}return t});
-if(migrated)localStorage.setItem("yachipBusTripsV2",JSON.stringify(trips));
+const beforeCleanup=trips.length;trips=trips.filter(t=>!["市川学園（市川駅）","市川駅"].includes(t.stop)&&!["系統なし","非経由便"].includes(t.route));if(migrated||trips.length!==beforeCleanup)localStorage.setItem("yachipBusTripsV2",JSON.stringify(trips));
 function save(){localStorage.setItem("yachipBusTripsV2",JSON.stringify(trips))}
 function options(id,arr,first=false){$(id).innerHTML=(first?'<option value="すべて">すべて</option>':"")+arr.map(x=>`<option value="${x}">${x}</option>`).join("")}
 function fillRoute(stopId,routeId,includeAll=true){options(routeId,stationRoutes[$(stopId).value]||[],includeAll)}
@@ -186,32 +181,28 @@ options("addStop",places);fillRoute("addStop","addRoute",false);
 $("addStop").addEventListener("change",()=>{fillRoute("addStop","addRoute",false);fillRouteDetails()});
 $("addRoute").addEventListener("change",fillRouteDetails);
 function destinationFor(stop,route){
- if(route==="系統なし")return stop==="市川学園（市川駅）"?"市川駅":"";
- if(["13","14","15"].includes(route)){
-  if(stop==="市川学園（市川大野）")return "市川大野駅";
+  if(["13","14","15"].includes(route)){
+  if(stop==="市川学園（市川大野）")return "市川大野駅方面";
   if(stop==="市川大野駅")return "市川学園";
  }
  if(route==="臨時"||route==="スクールバス"){
   if(stop==="本八幡駅")return "市川学園・正門前";
   if(stop==="市川学園（本八幡）"||stop==="正門前（本八幡）")return "本八幡駅";
   if(stop==="市川大野駅")return "正門前";
-  if(stop==="正門前（市川大野）")return "市川大野駅";
- }
+   }
  if(route==="路線バス")return stop==="市川学園（市川大野）"?"市川大野駅":"市川学園";
- if(route==="非経由便")return stop==="正門前（市川大野）"?"市川大野駅":"正門前";
- const info=routeMaster[route];if(!info)return "";
+  const info=routeMaster[route];if(!info)return "";
  if(stop==="本八幡駅")return route==="16"||route==="74"?"正門前":route==="15"?"動植物園":"医療センター入口";
  if(stop==="市川大野駅")return route==="非経由便"?"正門前":"市川学園";
  if(stop==="西船橋駅")return "正門前";
  if(stop==="市川学園（本八幡）")return "本八幡駅";
- if(stop==="市川学園（市川大野）")return "市川大野駅";
+ if(stop==="市川学園（市川大野）")return "市川大野駅方面";
  if(stop==="正門前（本八幡）")return "本八幡駅";
- if(stop==="正門前（市川大野）")return "市川大野駅";
- if(stop==="正門前（西船橋）")return "西船橋駅";
+  if(stop==="正門前（西船橋）")return "西船橋駅";
  return info.ends[0]||"";
 }
 function displayRoute(route){return /^\d/.test(route)?"本"+route:route==="市61"?"":route;}
-function displayDestination(t){const d=(routeMaster[t.route]&&destinationFor(t.stop,t.route))||t.displayDest||t.dest||"—";return t.route==="系統なし"?`<span class="muted">${d}</span>`:d;}
+function displayDestination(t){const d=(routeMaster[t.route]&&destinationFor(t.stop,t.route))||t.displayDest||t.dest||"—";return d;}
 function schoolToHachimanNotice(stop){return stop==="市川学園（本八幡）"?'<p class="notice" style="color:#c62828;background:#fff1f1;border-color:#efb2b2;font-weight:800">正門前発のスクールバスはシステム上表示されません。ご了承ください。</p>':"";}
 function fillRouteDetails(){
  const stop=$("addStop").value, route=$("addRoute").value;
