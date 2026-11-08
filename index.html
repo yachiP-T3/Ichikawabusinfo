@@ -37,7 +37,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </head>
 <body>
 <header>
-  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.2</span></div>
+  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.3</span></div>
   <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
   <div class="sub" style="color:#c62828;font-weight:800">一時的に正門前発のバスのみ対応</div>
 </header>
@@ -334,21 +334,33 @@ function refreshViews(){renderDepartures();renderTimetable()}
 function renderDepartures(){
  if(!$("depStop").value)return;
  const selected=$("depStop").value;
- // 日付と時刻を組み合わせ、翌日以降の便も含めて先発1便を探す。
- const list=filtered(selected,null,null).sort((a,b)=>(a.date+" "+a.time).localeCompare(b.date+" "+b.time));
- const now=new Date(),current=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
- const next=list.find(t=>new Date(t.date+"T"+t.time+":00").getTime()>now.getTime());
- if(!next){
-  $("depResult").innerHTML=schoolToHachimanNotice(selected)+'<div class="empty">現在時刻より後に発車する便はありません。</div>';
+ const now=new Date();
+ const tomorrow=new Date(now);
+ tomorrow.setDate(tomorrow.getDate()+1);
+ const endDate=`${tomorrow.getFullYear()}-${String(tomorrow.getMonth()+1).padStart(2,"0")}-${String(tomorrow.getDate()).padStart(2,"0")}`;
+ const endTime=new Date(`${endDate}T23:59:59`).getTime();
+ const current=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+ // 今日の現在時刻以降から、明日23:59までの便をすべて時系列で表示する。
+ const list=filtered(selected,null,null)
+  .filter(t=>{
+   const departure=new Date(t.date+"T"+t.time+":00").getTime();
+   return departure>now.getTime()&&departure<=endTime;
+  })
+  .sort((a,b)=>(a.date+" "+a.time).localeCompare(b.date+" "+b.time));
+ if(!list.length){
+  $("depResult").innerHTML=schoolToHachimanNotice(selected)+'<div class="empty">明日23:59までに発車する便はありません。</div>';
   return;
  }
  const isIchikawaStop=selected==="市川学園（市川駅）";
- let via=isIchikawaStop?"":(viaFor(next.stop,next.route)||next.via||"");
- // 市川大野駅発では、経由地欄に発車駅自身を重複表示しない。
- if(selected==="市川大野駅")via=via.replace(/市川大野駅・?/g,"").replace(/・市川大野駅/g,"").replace(/^・|・$/g,"");
- const route=isIchikawaStop?"":displayRoute(next.route);
- const destination=displayDestination(next);
- $("depResult").innerHTML=schoolToHachimanNotice(selected)+`<p class="muted">${current} 現在 · ${selected} · ${next.date}以降の便を検索</p><div class="panel" style="margin:0;padding:16px 18px"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="pill">先発</span><span class="bigtime">${next.time}</span><span class="muted">${next.date}</span>${route?`<span style="font-size:19px;font-weight:900;background:#e8f1ff;color:#174a85;padding:5px 11px;border-radius:9px">${route}</span>`:""}<span style="font-size:18px;font-weight:800">${destination}</span></div>${via?`<div style="font-size:15px;font-weight:600;margin-top:10px;color:var(--muted,#666)">経由：${via}</div>`:""}</div>`;
+ const cards=list.map((trip,index)=>{
+  let via=isIchikawaStop?"":(viaFor(trip.stop,trip.route)||trip.via||"");
+  // 市川大野駅発では、経由地欄に発車駅自身を重複表示しない。
+  if(selected==="市川大野駅")via=via.replace(/市川大野駅・?/g,"").replace(/・市川大野駅/g,"").replace(/^・|・$/g,"");
+  const route=isIchikawaStop?"":displayRoute(trip.route);
+  const destination=displayDestination(trip);
+  return `<div class="panel" style="margin:0 0 10px;padding:16px 18px"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">${index===0?'<span class="pill">先発</span>':""}<span class="bigtime">${trip.time}</span><span class="muted">${trip.date}</span>${route?`<span style="font-size:19px;font-weight:900;background:#e8f1ff;color:#174a85;padding:5px 11px;border-radius:9px">${route}</span>`:""}<span style="font-size:18px;font-weight:800">${destination}</span></div>${via?`<div style="font-size:15px;font-weight:600;margin-top:10px;color:var(--muted,#666)">経由：${via}</div>`:""}</div>`;
+ }).join("");
+ $("depResult").innerHTML=schoolToHachimanNotice(selected)+`<p class="muted">${current} 現在 · ${selected} · 今日から明日23:59までの便</p>`+cards;
 }
 function renderTimetable(){if(!$("ttStop").value)return;const list=filtered($("ttStop").value,$("ttDate").value,$("ttRoute").value);$("ttResult").innerHTML=schoolToHachimanNotice($("ttStop").value)+(list.length?`<table><thead><tr><th>発車時刻</th><th>系統</th><th>行先</th><th>経由</th></tr></thead><tbody>${list.map(t=>`<tr><td><b>${t.time.slice(0,5)}</b></td><td>${displayRoute(t.route)||"—"}</td><td>${displayDestination(t)}</td><td>${viaFor(t.stop,t.route)||t.via||"—"}</td></tr>`).join("")}</tbody></table>`:'<div class="empty">この条件の便はまだ登録されていません。</div>');
 }
