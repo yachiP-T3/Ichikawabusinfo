@@ -41,7 +41,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </head>
 <body>
 <header>
-  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.11</span></div>
+  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.12</span></div>
   <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
   
 </header>
@@ -321,7 +321,7 @@ function fillRouteDetails(){
 }
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 options("adminStop",places);options("copyStop",places);
-const fixedPlaces=["本八幡駅","市川大野駅","西船橋駅","市川学園（本八幡）","市川学園（市川大野）","市川学園（市川駅）"];options("fixedStop",fixedPlaces);$("fixedDate").value=today();$("fixedDate").addEventListener("change",updateFixedForm);$("fixedStop").addEventListener("change",updateFixedForm);$("registerFixed").addEventListener("click",registerFixedSchedule);updateFixedForm();
+const fixedPlaces=["本八幡駅","市川大野駅","西船橋駅","市川学園（本八幡）","市川学園（市川大野）","市川学園（市川駅）"];options("fixedStop",fixedPlaces);$("fixedDate").value=today();$("fixedDate").addEventListener("change",updateFixedForm);$("fixedStop").addEventListener("change",updateFixedForm);$("registerFixed").addEventListener("click",registerFixedSchedule);
 ["ttDate","addDate","adminDate","copyFrom","copyTo"].forEach(id=>$(id).value=today());
 fillRouteDetails();
 function go(page){document.querySelectorAll("main>section").forEach(x=>x.classList.add("hidden"));$(page).classList.remove("hidden");if(page==="departures")renderDepartures();if(page==="timetable")renderTimetable();if(page==="admin")refreshAuthState();window.scrollTo(0,0)}
@@ -448,6 +448,7 @@ const fixedScheduleData={
   holiday:"13:28-系統なし,13:53-系統なし,14:28-系統なし,15:03-系統なし,15:18-系統なし,15:38-系統なし,16:18-系統なし,16:48-系統なし,17:18-系統なし,17:48-系統なし,18:23-系統なし,18:38-系統なし"
  }
 };
+updateFixedForm();
 function parseFixedRows(raw){return raw?raw.split(",").filter(Boolean).map(item=>{const parts=item.split("-");return {time:parts[0],route:parts[1]};}):[];}
 function japaneseHolidays(year){
  const pad=n=>String(n).padStart(2,"0");
