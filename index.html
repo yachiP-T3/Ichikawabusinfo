@@ -48,7 +48,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <header>
   <div class="header-top">
     <div>
-      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.16</span></div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.0.0</span></div>
       <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
     </div>
     <div class="header-actions">
@@ -129,12 +129,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
     <div id="authIdentity" class="notice hidden" style="margin-top:12px;overflow-wrap:anywhere"></div>
   </div>
   <div id="adminTools" class="hidden">
-  <div class="panel">
-    <h3>ご意見一覧</h3>
-    <p class="muted">利用者から届いたご意見です。内容は管理者だけに表示されます。</p>
-    <div class="actions"><button type="button" class="btn" id="reloadFeedback">再読み込み</button></div>
-    <div id="adminFeedbackList"><div class="empty">読み込み待ち</div></div>
-  </div>
+
   <div class="panel">
     <h2>管理画面</h2>
     <div class="notice">時刻表データはSupabaseに保存され、すべての利用者に共通して表示されます。編集できるのは指定された管理者だけです。発車場所は方面ごとに別の停留所として登録します。</div>
@@ -172,6 +167,12 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
     <div class="row"><div><label>コピー元の日付</label><input type="date" id="copyFrom"></div><div><label>コピー先の日付</label><input type="date" id="copyTo"></div><div><label>発車場所</label><select id="copyStop"></select></div></div>
     <div class="actions"><button class="btn" id="copyTrips">この発車場所の便をコピー</button></div>
     <p class="muted">コピー先に既存の便がある場合は、上書き確認を表示します。コピー後は別々に編集できます。</p>
+  </div>
+  <div class="panel">
+    <h3>ご意見一覧</h3>
+    <p class="muted">利用者から届いたご意見です。内容は管理者だけに表示されます。</p>
+    <div class="actions"><button type="button" class="btn" id="reloadFeedback">再読み込み</button></div>
+    <div id="adminFeedbackList"><div class="empty">読み込み待ち</div></div>
   </div>
   </div>
 </section>
