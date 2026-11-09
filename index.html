@@ -456,7 +456,7 @@ function japaneseHolidays(year){
  const spring=Math.floor(20.8431+0.242194*(year-1980)-Math.floor((year-1980)/4));
  const autumn=Math.floor(23.2488+0.242194*(year-1980)-Math.floor((year-1980)/4));
  const days=new Set([key(1,1),key(1,nthMonday(1,2)),key(2,11),key(2,23),key(3,spring),key(4,29),key(5,3),key(5,4),key(5,5),key(7,nthMonday(7,3)),key(8,11),key(9,nthMonday(9,3)),key(9,autumn),key(10,nthMonday(10,2)),key(11,3),key(11,23)]);
- for(let d=2;d<31;d++){const date=new Date(year,0,d);const before=new Date(year,0,d-1);const after=new Date(year,0,d+1);const fmt=x=>year+"-"+pad(x.getMonth()+1)+"-"+pad(x.getDate());if(!days.has(fmt(date))&&days.has(fmt(before))&&days.has(fmt(after)))days.add(fmt(date));}
+ for(let d=2;d<365;d++){const date=new Date(year,0,d);const before=new Date(year,0,d-1);const next=new Date(year,0,d+1);const fmt=x=>year+"-"+pad(x.getMonth()+1)+"-"+pad(x.getDate());if(date.getFullYear()===year&&!days.has(fmt(date))&&days.has(fmt(before))&&days.has(fmt(next)))days.add(fmt(date));}
  for(const value of [...days].sort()){const p=value.split("-").map(Number);if(new Date(p[0],p[1]-1,p[2]).getDay()===0){const date=new Date(p[0],p[1]-1,p[2]);do{date.setDate(date.getDate()+1);}while(days.has(year+"-"+pad(date.getMonth()+1)+"-"+pad(date.getDate())));days.add(year+"-"+pad(date.getMonth()+1)+"-"+pad(date.getDate()));}}
  return days;
 }
