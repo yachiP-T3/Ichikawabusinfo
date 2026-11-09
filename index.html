@@ -9,6 +9,10 @@
 :root{--blue:#32a9d6;--blue-bg:#eaf8fd;--orange:#ed963b;--orange-bg:#fff4e8;--green:#83b83e;--green-bg:#f2f9e9;--ink:#17212b;--muted:#667585;--line:#e3e9ef;--bg:#f5f8fb}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Yu Gothic Medium","游ゴシック Medium","YuGothic Medium","Yu Gothic","游ゴシック体",Meiryo,sans-serif;font-weight:500}
 header{background:white;border-bottom:1px solid var(--line);padding:22px max(20px,calc((100% - 1000px)/2))}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:18px;max-width:1000px;margin:0 auto}
+.header-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.header-link{border:0;background:transparent;color:#1769aa;font:inherit;font-size:14px;font-weight:700;cursor:pointer;padding:7px 0;white-space:nowrap}
+.header-link:hover{text-decoration:underline}
 .brand{font-size:clamp(22px,4vw,30px);font-weight:800;letter-spacing:.01em;cursor:pointer}.brand:hover{opacity:.78}.version{font-size:.55em;font-weight:700;color:var(--muted);margin-left:7px;vertical-align:middle}.sub{color:var(--muted);font-size:13px;margin-top:5px}
 nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
 nav button,.btn{border:1px solid var(--line);background:white;color:var(--ink);padding:10px 14px;border-radius:10px;font-weight:650;cursor:pointer;font-family:inherit}
@@ -34,7 +38,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 .notice{padding:12px 14px;background:#fff8e8;border:1px solid #f2dfb4;border-radius:10px;font-size:13px;line-height:1.6}
 .hidden{display:none!important}.bigtime{font-size:29px;font-weight:850;margin-top:7px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,18px);opacity:0;pointer-events:none;background:#17212b;color:#fff;padding:13px 20px;border-radius:12px;box-shadow:0 6px 24px #0003;font-size:14px;font-weight:800;z-index:9999;transition:opacity .22s ease,transform .22s ease;max-width:calc(100vw - 32px);text-align:center}#toast.show{opacity:1;transform:translate(-50%,0)}
-@media(max-width:600px){header{padding:18px}.panel{padding:16px}main{margin-top:18px}.linkcard{gap:6px}.place{font-size:14px}}
+@media(max-width:600px){header{padding:18px}.header-top{align-items:flex-start;flex-direction:column;gap:8px}.header-actions{gap:18px}.panel{padding:16px}main{margin-top:18px}.linkcard{gap:6px}.place{font-size:14px}}
 
 /* 全要素を游ゴシック Medium・ウェイト500に統一 */
 *,*::before,*::after{font-family:"Yu Gothic Medium","游ゴシック Medium","YuGothic Medium","Yu Gothic","游ゴシック体","Hiragino Kaku Gothic ProN",Meiryo,sans-serif!important;font-weight:500!important}
@@ -42,11 +46,29 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </head>
 <body>
 <header>
-  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.13</span></div>
-  <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
+  <div class="header-top">
+    <div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.14</span></div>
+      <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="header-link" id="feedbackLink">ご意見をお願いします →</button>
+      <button type="button" class="header-link" id="headerAdminLink">管理者画面 →</button>
+    </div>
+  </div>
   <div class="release-banner">祝　正式リリース！！！！！</div>
 </header>
 <main>
+<section id="feedback" class="hidden">
+  <div class="panel">
+    <h2>ご意見・ご要望</h2>
+    <p class="muted">サイトへのご意見、不具合の報告、追加してほしい機能などを送ってね。内容は管理者だけが確認できます。名前やメールアドレスの入力は不要です。</p>
+    <label for="feedbackMessage">メッセージ</label>
+    <textarea id="feedbackMessage" maxlength="1500" rows="6" placeholder="ご意見・ご要望を入力してください（1500文字以内）" style="width:100%;padding:12px;border:1px solid #ccd6df;border-radius:9px;background:white;font:inherit;color:var(--ink);resize:vertical"></textarea>
+    <div class="actions"><button type="button" class="btn primary" id="sendFeedback">送信する</button><button type="button" class="btn" id="feedbackBack">戻る</button></div>
+    <div id="feedbackMessageStatus" class="muted" style="margin-top:10px" aria-live="polite"></div>
+  </div>
+</section>
 <section id="home">
   <div class="panel"><h2>先発確認 / 運行情報</h2><div class="home-matrix" id="depMatrix">
   <div class="home-group"><h3 class="home-heading">各駅 → 市川学園</h3>
@@ -116,6 +138,12 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
     <div id="authIdentity" class="notice hidden" style="margin-top:12px;overflow-wrap:anywhere"></div>
   </div>
   <div id="adminTools" class="hidden">
+  <div class="panel">
+    <h3>ご意見一覧</h3>
+    <p class="muted">利用者から届いたご意見です。内容は管理者だけに表示されます。</p>
+    <div class="actions"><button type="button" class="btn" id="reloadFeedback">再読み込み</button></div>
+    <div id="adminFeedbackList"><div class="empty">読み込み待ち</div></div>
+  </div>
   <div class="panel">
     <h2>管理画面</h2>
     <div class="notice">時刻表データはSupabaseに保存され、すべての利用者に共通して表示されます。編集できるのは指定された管理者だけです。発車場所は方面ごとに別の停留所として登録します。</div>
@@ -205,6 +233,30 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_58zOYZ-WbC6vHVgiwhREew_ZZmK_Ftw
 const ADMIN_UID = "9a1ed85a-411f-4b90-b023-c21556cea970";
 const authClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 let currentAuthUser = null;
+function escapeHTML(value){return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
+async function loadFeedback(){
+  const target=$("adminFeedbackList");
+  if(!target||currentAuthUser?.id!==ADMIN_UID)return;
+  target.innerHTML='<div class="empty">読み込み中…</div>';
+  const {data,error}=await authClient.from("feedback").select("id,message,created_at").order("created_at",{ascending:false}).limit(100);
+  if(error){
+    target.innerHTML='<div class="notice">ご意見を読み込めませんでした。Supabaseに専用テーブルを作成済みか確認してください。</div>';
+    return;
+  }
+  if(!data?.length){target.innerHTML='<div class="empty">まだご意見は届いていません。</div>';return;}
+  target.innerHTML=data.map(item=>{
+    const date=new Date(item.created_at);
+    const stamp=Number.isNaN(date.getTime())?"日時不明":date.toLocaleString("ja-JP");
+    return '<div class="panel" style="margin:10px 0;padding:14px"><div class="muted">'+escapeHTML(stamp)+'</div><div style="white-space:pre-wrap;overflow-wrap:anywhere;margin-top:8px">'+escapeHTML(item.message)+'</div><div class="actions"><button type="button" class="btn" data-feedback-delete="'+escapeHTML(item.id)+'">削除</button></div></div>';
+  }).join("");
+  target.querySelectorAll("[data-feedback-delete]").forEach(button=>button.addEventListener("click",async()=>{
+    if(currentAuthUser?.id!==ADMIN_UID||!confirm("このご意見を削除する？"))return;
+    button.disabled=true;
+    const {error}=await authClient.from("feedback").delete().eq("id",button.dataset.feedbackDelete);
+    if(error){button.disabled=false;alert("削除できませんでした。");return;}
+    loadFeedback();
+  }));
+}
 function updateAuthPanel(){
   const login=$("githubLogin"), logout=$("githubLogout"), identity=$("authIdentity"), message=$("authMessage");
   if(!login||!logout||!identity||!message)return;
@@ -225,6 +277,7 @@ function updateAuthPanel(){
     message.textContent="管理者としてログインしています。";
     $("adminTools").classList.remove("hidden");
     renderAdmin();
+    loadFeedback();
   }else{
     message.textContent="このアカウントには管理者権限がありません。";
     $("adminTools").classList.add("hidden");
@@ -330,6 +383,26 @@ function go(page){document.querySelectorAll("main>section").forEach(x=>x.classLi
 $("homeTitle").addEventListener("click",()=>go("home"));
 $("homeTitle").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go("home")}});
 $("adminLink").addEventListener("click",()=>go("admin"));
+$("feedbackLink").addEventListener("click",()=>go("feedback"));
+$("headerAdminLink").addEventListener("click",()=>go("admin"));
+$("feedbackBack").addEventListener("click",()=>go("home"));
+$("sendFeedback").addEventListener("click",async()=>{
+  const message=$("feedbackMessage").value.trim();
+  if(!message){$("feedbackMessageStatus").textContent="メッセージを入力してね。";return;}
+  if(message.length>1500){$("feedbackMessageStatus").textContent="1500文字以内で入力してね。";return;}
+  const button=$("sendFeedback");
+  button.disabled=true;
+  $("feedbackMessageStatus").textContent="送信中…";
+  const {error}=await authClient.from("feedback").insert({message});
+  button.disabled=false;
+  if(error){
+    $("feedbackMessageStatus").textContent="送信できませんでした。時間をおいて再度お試しください。";
+    return;
+  }
+  $("feedbackMessage").value="";
+  $("feedbackMessageStatus").textContent="送信ありがとう！管理者に届きました。";
+});
+$("reloadFeedback").addEventListener("click",loadFeedback);
 // ホームの表示順は「各駅→市川学園」「正門前→各駅」「市川学園→各駅」。
 const homeRows=[
  {heading:"各駅 → 市川学園",items:[
