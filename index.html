@@ -41,7 +41,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </head>
 <body>
 <header>
-  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.10</span></div>
+  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.11</span></div>
   <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
   
 </header>
@@ -247,7 +247,6 @@ $("githubLogout").addEventListener("click",async()=>{
 authClient.auth.onAuthStateChange((_event,session)=>{currentAuthUser=session?.user||null;updateAuthPanel();});
 refreshAuthState();
 
-const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 let trips=[];
 let tripsLoaded=false;
 function mapTrip(row){return {id:row.id,date:row.date,time:String(row.time||"").slice(0,5),stop:row.stop,route:row.route,displayDest:row.display_dest||"",via:row.via||""};}
@@ -320,6 +319,7 @@ function fillRouteDetails(){
  $("addDisplayDest").value=info?destinationFor(stop,route):"";
  $("addVia").value=info?viaFor(stop,route):"";
 }
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 options("adminStop",places);options("copyStop",places);
 const fixedPlaces=["本八幡駅","市川大野駅","西船橋駅","市川学園（本八幡）","市川学園（市川大野）","市川学園（市川駅）"];options("fixedStop",fixedPlaces);$("fixedDate").value=today();$("fixedDate").addEventListener("change",updateFixedForm);$("fixedStop").addEventListener("change",updateFixedForm);$("registerFixed").addEventListener("click",registerFixedSchedule);updateFixedForm();
 ["ttDate","addDate","adminDate","copyFrom","copyTo"].forEach(id=>$(id).value=today());
