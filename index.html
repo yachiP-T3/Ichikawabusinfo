@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>バス時刻表配信 created by yachiP</title>
 <style>
+.release-banner{display:inline-block;margin-top:8px;padding:7px 14px;background:#ffeb3b;color:#111;border:2px solid #d6aa00;border-radius:7px;font-size:16px;font-weight:800}
 :root{--blue:#32a9d6;--blue-bg:#eaf8fd;--orange:#ed963b;--orange-bg:#fff4e8;--green:#83b83e;--green-bg:#f2f9e9;--ink:#17212b;--muted:#667585;--line:#e3e9ef;--bg:#f5f8fb}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Yu Gothic Medium","游ゴシック Medium","YuGothic Medium","Yu Gothic","游ゴシック体",Meiryo,sans-serif;font-weight:500}
 header{background:white;border-bottom:1px solid var(--line);padding:22px max(20px,calc((100% - 1000px)/2))}
@@ -41,9 +42,9 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </head>
 <body>
 <header>
-  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.12</span></div>
+  <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.13</span></div>
   <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
-  
+  <div class="release-banner">祝　正式リリース！！！！！</div>
 </header>
 <main>
 <section id="home">
@@ -298,6 +299,7 @@ function destinationFor(stop,route){
  return info.ends[0]||"";
 }
 function viaFor(stop,route){
+ if(stop==="正門前（西船橋）"&&route==="一般")return "東中山駅";
  if(stop==="西船橋駅")return "";
  // 市川大野駅発の13/14/15は本八幡駅行、経由は京成八幡駅。
  if(stop==="市川大野駅"&&["13","14","15"].includes(route))return "京成八幡駅";
@@ -312,7 +314,7 @@ function viaFor(stop,route){
 }
 function displayRoute(route){return /^\d/.test(route)?"本"+route:(["系統なし","一般","貸切"].includes(route)?"":route);}
 function displayDestination(t){const d=(routeMaster[t.route]&&destinationFor(t.stop,t.route))||t.displayDest||t.dest||"—";return d;}
-function schoolToHachimanNotice(stop){return stop==="市川学園（本八幡）"?'<p class="notice" style="color:#c62828;background:#fff1f1;border-color:#efb2b2;font-weight:800">正門前発のスクールバスはシステム上表示されません。ご了承ください。</p>':"";}
+function schoolToHachimanNotice(stop){return stop==="本八幡駅"?'<p class="notice" style="color:#c62828;background:#fff1f1;border-color:#efb2b2;font-weight:800">臨時はスクールバスも含みます。</p>':"";}
 function fillRouteDetails(){
  const stop=$("addStop").value, route=$("addRoute").value;
  const info=routeMaster[route];
@@ -395,7 +397,7 @@ function renderDepartures(){
  });
  const priority={date:0,hour:1,trip:2};
  events.sort((a,b)=>a.time-b.time||priority[a.type]-priority[b.type]);
- const isIchikawaStop=selected==="市川学園（市川駅）";
+ const isIchikawaStop=selected==="市川学園（市川駅）"||selected==="市川学園（市川大野）";
  const timeline=events.map(event=>{
   if(event.type==="date"){
    return `<div style="display:flex;align-items:center;gap:10px;color:#c87575;font-size:14px;font-weight:800;margin:18px 0 14px"><span style="white-space:nowrap">${event.label}</span><span style="flex:1;border-top:2px solid #edb6b6"></span></div>`;
@@ -413,7 +415,7 @@ function renderDepartures(){
  const empty=list.length?"":'<div class="empty">明日23:59までに発車する便はありません。</div>';
  $("depResult").innerHTML=schoolToHachimanNotice(selected)+`<p class="muted">${current} 現在 · ${selected} · 今日から明日23:59まで</p>`+empty+timeline;
 }
-function renderTimetable(){if(!$("ttStop").value)return;const stop=$("ttStop").value;const list=filtered(stop,$("ttDate").value,$("ttRoute").value);const simple=stop==="西船橋駅"||stop==="市川学園（市川駅）";$("ttResult").innerHTML=schoolToHachimanNotice(stop)+(list.length?`<table><thead><tr><th>発車時刻</th>${simple?"":"<th>系統</th>"}<th>行先</th>${simple?"":"<th>経由</th>"}</tr></thead><tbody>${list.map(t=>`<tr><td><b>${t.time.slice(0,5)}</b></td>${simple?"":`<td>${displayRoute(t.route)||"—"}</td>`}<td>${displayDestination(t)}</td>${simple?"":`<td>${viaFor(t.stop,t.route)||t.via||"—"}</td>`}</tr>`).join("")}</tbody></table>`:'<div class="empty">この条件の便はまだ登録されていません。</div>');}
+function renderTimetable(){if(!$("ttStop").value)return;const stop=$("ttStop").value;const list=filtered(stop,$("ttDate").value,$("ttRoute").value);const simple=stop==="西船橋駅"||stop==="市川学園（市川駅）"||stop==="市川学園（市川大野）";$("ttResult").innerHTML=schoolToHachimanNotice(stop)+(list.length?`<table><thead><tr><th>発車時刻</th>${simple?"":"<th>系統</th>"}<th>行先</th>${simple?"":"<th>経由</th>"}</tr></thead><tbody>${list.map(t=>`<tr><td><b>${t.time.slice(0,5)}</b></td>${simple?"":`<td>${displayRoute(t.route)||"—"}</td>`}<td>${displayDestination(t)}</td>${simple?"":`<td>${viaFor(t.stop,t.route)||t.via||"—"}</td>`}</tr>`).join("")}</tbody></table>`:'<div class="empty">この条件の便はまだ登録されていません。</div>');}
 
 
 const fixedScheduleData={
