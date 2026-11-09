@@ -48,7 +48,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <header>
   <div class="header-top">
     <div>
-      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.15</span></div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v0.9.16</span></div>
       <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
     </div>
     <div class="header-actions">
@@ -59,16 +59,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
   <div class="release-banner">祝　正式リリース！！！！！</div>
 </header>
 <main>
-<section id="feedback" class="hidden">
-  <div class="panel">
-    <h2>ご意見・ご要望</h2>
-    <p class="muted">サイトへのご意見、不具合の報告、追加してほしい機能などを送ってね。内容は管理者だけが確認できます。名前やメールアドレスの入力は不要です。</p>
-    <label for="feedbackMessage">メッセージ</label>
-    <textarea id="feedbackMessage" maxlength="1500" rows="6" placeholder="ご意見・ご要望を入力してください（1500文字以内）" style="width:100%;padding:12px;border:1px solid #ccd6df;border-radius:9px;background:white;font:inherit;color:var(--ink);resize:vertical"></textarea>
-    <div class="actions"><button type="button" class="btn primary" id="sendFeedback">送信する</button><button type="button" class="btn" id="feedbackBack">戻る</button></div>
-    <div id="feedbackMessageStatus" class="muted" style="margin-top:10px" aria-live="polite"></div>
-  </div>
-</section>
+
 <section id="home">
   <div class="panel"><h2>先発確認 / 運行情報</h2><div class="home-matrix" id="depMatrix">
   <div class="home-group"><h3 class="home-heading">各駅 → 市川学園</h3>
@@ -184,6 +175,16 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
   </div>
   </div>
 </section>
+ <section id="feedback" class="hidden">
+   <div class="panel">
+     <h2>ご意見・ご要望</h2>
+     <p class="muted">サイトへのご意見、不具合の報告、追加してほしい機能などを送って送信していただけると嬉しいです。個人情報等は入力しないことをお勧めします。入力されても個人情報の部分は見なかったことにします。</p>
+     <label for="feedbackMessage">メッセージ</label>
+     <textarea id="feedbackMessage" maxlength="1500" rows="6" placeholder="ご意見・ご要望を入力してください（1500文字以内）" style="width:100%;padding:12px;border:1px solid #ccd6df;border-radius:9px;background:white;font:inherit;color:var(--ink);resize:vertical"></textarea>
+     <div class="actions"><button type="button" class="btn primary" id="sendFeedback">送信する</button><button type="button" class="btn" id="feedbackBack">戻る</button></div>
+     <div id="feedbackMessageStatus" class="muted" style="margin-top:10px" aria-live="polite"></div>
+   </div>
+ </section>
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
 <footer style="max-width:1000px;margin:0 auto;padding:0 18px 30px;color:#667585;font-size:12px">© yachiP · 試作版</footer>
