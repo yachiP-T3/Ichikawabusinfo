@@ -48,7 +48,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <header>
   <div class="header-top">
     <div>
-      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.2</span></div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.3</span></div>
       <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
     </div>
     <div class="header-actions">
@@ -337,7 +337,7 @@ $("addRoute").addEventListener("change",fillRouteDetails);
 function destinationFor(stop,route){
  if(stop==="正門前（市川大野）")return "市川大野駅";
  if(route==="系統なし")return stop==="市川学園（市川駅）"?"市川駅":"";
- if(route==="路線バス")return stop==="市川大野駅"?"市川学園":stop==="市川学園（市川大野）"?"市川大野駅方面":"";
+ if(route==="路線バス")return stop==="市川大野駅"?"本八幡駅":stop==="市川学園（市川大野）"?"市川大野駅方面":"";
  if(["13","14","15"].includes(route)&&stop==="市川大野駅")return "本八幡駅";
  if(route==="臨時"||route==="スクールバス"){
   if(stop==="本八幡駅")return "市川学園正門前";
