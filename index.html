@@ -78,8 +78,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
   <div class="home-group"><h3 class="home-heading">各駅 → 市川学園</h3>
     <button class="home-button route-hachiman" data-stop="本八幡駅">本八幡駅 発</button>
     <button class="home-button route-ono" data-stop="市川大野駅">市川大野駅 発</button>
-    <button class="home-button route-funabashi" data-stop="西船橋駅">西船橋駅 発</button>
-  </div>
+      </div>
   <div class="home-group"><h3 class="home-heading">市川学園正門前 → 各駅</h3>
     <button class="home-button route-hachiman" data-stop="正門前（本八幡）">本八幡駅 方面</button>
     <button class="home-button route-ono" data-stop="正門前（市川大野）">市川大野駅 方面</button>
@@ -475,7 +474,7 @@ function stopSequenceFor(trip){return (stopSequences[trip.stop]||{})[trip.route]
 function stopDirectionsFor(trip){
  const stop=trip.stop,route=String(trip.route);
  if(stop==="本八幡駅"&&["11","12","13","14","15"].includes(route))return {after:"↓市川大野駅方面へ"};
- if(stop==="市川大野駅"&&["13","14","15"].includes(route))return {before:"↓医療センター入口方面から",after:"↓本八幡駅方面へ"};
+ if(stop==="市川大野駅"&&["13","14","15","路線バス"].includes(route))return {before:"↓医療センター入口方面から",after:"↓本八幡駅方面へ"};
  if(stop==="市川学園（本八幡）"&&["11","12","13","14","15"].includes(route))return {before:"↓市川大野駅方面から"};
  if(stop==="市川学園（本八幡）"&&route==="74")return {before:"↓市川学園正門前から"};
  if(stop==="市川学園（市川大野）"&&route==="路線バス")return {before:"↓本八幡駅方面から",after:"↓医療センター入口方面へ"};
