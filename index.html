@@ -48,7 +48,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <header>
   <div class="header-top">
     <div>
-      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.1</span></div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.2</span></div>
       <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
     </div>
     <div class="header-actions">
@@ -67,7 +67,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
     <button class="home-button route-ono" data-stop="市川大野駅">市川大野駅 発</button>
     <button class="home-button route-funabashi" data-stop="西船橋駅">西船橋駅 発</button>
   </div>
-  <div class="home-group"><h3 class="home-heading">正門前 → 各駅</h3>
+  <div class="home-group"><h3 class="home-heading">市川学園正門前 → 各駅</h3>
     <button class="home-button route-hachiman" data-stop="正門前（本八幡）">本八幡駅 方面</button>
     <button class="home-button route-ono" data-stop="正門前（市川大野）">市川大野駅 方面</button>
     <button class="home-button route-funabashi" data-stop="正門前（西船橋）">西船橋駅 方面</button>
@@ -84,7 +84,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
     <button class="home-button route-ono" data-stop="市川大野駅">市川大野駅 発</button>
     <button class="home-button route-funabashi" data-stop="西船橋駅">西船橋駅 発</button>
   </div>
-  <div class="home-group"><h3 class="home-heading">正門前 → 各駅</h3>
+  <div class="home-group"><h3 class="home-heading">市川学園正門前 → 各駅</h3>
     <button class="home-button route-hachiman" data-stop="正門前（本八幡）">本八幡駅 方面</button>
     <button class="home-button route-ono" data-stop="正門前（市川大野）">市川大野駅 方面</button>
     <button class="home-button route-funabashi" data-stop="正門前（西船橋）">西船橋駅 方面</button>
@@ -215,14 +215,14 @@ const routeMaster={
  "13":{ends:["本八幡駅","医療センター入口"],via:"京成八幡駅・市川大野駅"},
  "14":{ends:["本八幡駅","医療センター入口"],via:"京成八幡駅・市川大野駅・大野町四丁目回り"},
  "15":{ends:["本八幡駅","動植物園"],via:"京成八幡駅・市川大野駅"},
- "16":{ends:["本八幡駅","正門前"],via:"京成八幡駅"},
+ "16":{ends:["本八幡駅","市川学園正門前"],via:"京成八幡駅"},
  "71":{ends:["本八幡駅","医療センター入口"],via:"鬼越駅"},
- "74":{ends:["本八幡駅","正門前"],via:"鬼越駅"},
+ "74":{ends:["本八幡駅","市川学園正門前"],via:"鬼越駅"},
  "路線バス":{ends:["市川大野駅","市川学園"],via:""},
  "臨時":{ends:[],via:""},
  "スクールバス":{ends:[],via:""},
- "一般":{ends:["西船橋駅","正門前"],via:"東中山駅停車"},
- "貸切":{ends:["西船橋駅","正門前"],via:"無停車"},
+ "一般":{ends:["西船橋駅","市川学園正門前"],via:"東中山駅停車"},
+ "貸切":{ends:["西船橋駅","市川学園正門前"],via:"無停車"},
  "系統なし":{ends:["市川学園","市川駅"],via:""},
  };
 const campusStops=new Set(["市川学園（本八幡）","市川学園（市川大野）","正門前（本八幡）","正門前（市川大野）","正門前（西船橋）","市川学園（市川駅）"]);
@@ -323,7 +323,8 @@ async function loadTripsFromCloud(){
   return true;
 }
 
-function options(id,arr,first=false){$(id).innerHTML=(first?'<option value="すべて">すべて</option>':"")+arr.map(x=>`<option value="${x}">${x}</option>`).join("")}
+function displayStopName(stop){return String(stop).replace(/^正門前(?=（)/,"市川学園正門前")}
+function options(id,arr,first=false){$(id).innerHTML=(first?'<option value="すべて">すべて</option>':"")+arr.map(x=>`<option value="${x}">${displayStopName(x)}</option>`).join("")}
 function fillRoute(stopId,routeId,includeAll=true){options(routeId,stationRoutes[$(stopId).value]||[],includeAll)}
 function initStopRoute(stopId,routeId){options(stopId,places);fillRoute(stopId,routeId);$(stopId).addEventListener("change",()=>{fillRoute(stopId,routeId);refreshViews()});$(routeId).addEventListener("change",refreshViews)}
 options("depStop",places);
@@ -339,14 +340,14 @@ function destinationFor(stop,route){
  if(route==="路線バス")return stop==="市川大野駅"?"市川学園":stop==="市川学園（市川大野）"?"市川大野駅方面":"";
  if(["13","14","15"].includes(route)&&stop==="市川大野駅")return "本八幡駅";
  if(route==="臨時"||route==="スクールバス"){
-  if(stop==="本八幡駅")return "正門前";
+  if(stop==="本八幡駅")return "市川学園正門前";
   if(stop==="市川学園（本八幡）"||stop==="正門前（本八幡）")return "本八幡駅";
-  if(stop==="市川大野駅")return "正門前";
+  if(stop==="市川大野駅")return "市川学園正門前";
    }
   const info=routeMaster[route];if(!info)return "";
- if(stop==="本八幡駅")return route==="16"||route==="74"?"正門前":route==="15"?"動植物園":"医療センター入口";
+ if(stop==="本八幡駅")return route==="16"||route==="74"?"市川学園正門前":route==="15"?"動植物園":"医療センター入口";
  if(stop==="市川大野駅")return "市川学園";
- if(stop==="西船橋駅")return "正門前";
+ if(stop==="西船橋駅")return "市川学園正門前";
  if(stop==="市川学園（本八幡）")return "本八幡駅";
  if(stop==="市川学園（市川大野）")return "市川大野駅";
  if(stop==="正門前（本八幡）")return "本八幡駅";
@@ -411,7 +412,7 @@ const homeRows=[
   {label:"本八幡駅 発",stop:"本八幡駅",colour:"hachiman"},
   {label:"市川大野駅 発",stop:"市川大野駅",colour:"ono"},
   {label:"西船橋駅 発",stop:"西船橋駅",colour:"funabashi"}]},
- {heading:"正門前 → 各駅",items:[
+ {heading:"市川学園正門前 → 各駅",items:[
   {label:"本八幡駅 方面",stop:"正門前（本八幡）",colour:"hachiman"},
   {label:"市川大野駅 方面",stop:"正門前（市川大野）",colour:"ono"},
   {label:"西船橋駅 方面",stop:"正門前（西船橋）",colour:"funabashi"}]},
@@ -554,7 +555,7 @@ async function registerFixedSchedule(){
  if(duplicates.length){const msg="重複する便があったため該当の便は登録していません。ご確認ください";$("fixedMessage").textContent=msg+"（登録："+fresh.length+"便／重複："+duplicates.length+"便）";showToast(msg);}else{$("fixedMessage").textContent="固定時刻を"+fresh.length+"便登録しました。";showToast("固定時刻を"+fresh.length+"便登録したよ！");}
 }
 
-function renderAdmin(){if(!ADMIN_UID||currentAuthUser?.id!==ADMIN_UID)return;const list=trips.filter(t=>t.stop===$("adminStop").value&&t.date===$("adminDate").value).sort((a,b)=>a.time.localeCompare(b.time));$("adminTrips").innerHTML=list.length?`<table><thead><tr><th>時刻</th><th>発車場所</th><th>系統</th><th></th></tr></thead><tbody>${list.map(t=>`<tr><td>${t.time.slice(0,5)}</td><td>${t.stop}</td><td>${t.route}</td><td><button class="btn" onclick="removeTrip('${t.id}')">削除</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">登録便なし</div>'}
+function renderAdmin(){if(!ADMIN_UID||currentAuthUser?.id!==ADMIN_UID)return;const list=trips.filter(t=>t.stop===$("adminStop").value&&t.date===$("adminDate").value).sort((a,b)=>a.time.localeCompare(b.time));$("adminTrips").innerHTML=list.length?`<table><thead><tr><th>時刻</th><th>発車場所</th><th>系統</th><th></th></tr></thead><tbody>${list.map(t=>`<tr><td>${t.time.slice(0,5)}</td><td>${displayStopName(t.stop)}</td><td>${t.route}</td><td><button class="btn" onclick="removeTrip('${t.id}')">削除</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">登録便なし</div>'}
 window.removeTrip=async id=>{
  if(currentAuthUser?.id!==ADMIN_UID){$("adminMessage").textContent="管理者としてログインしてください。";return}
  if(!confirm("この便を削除する？"))return;
