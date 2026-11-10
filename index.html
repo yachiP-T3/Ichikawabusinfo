@@ -37,7 +37,9 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 .muted{color:var(--muted);font-size:13px;font-weight:500}.empty{padding:22px;text-align:center;color:var(--muted);background:#f8fafc;border-radius:10px}
 .notice{padding:12px 14px;background:#fff8e8;border:1px solid #f2dfb4;border-radius:10px;font-size:13px;line-height:1.6}
 .hidden{display:none!important}.bigtime{font-size:29px;font-weight:850;margin-top:7px}
-.trip-detail-toggle,.timetable-time-button{border:0;background:transparent;color:#1769aa;font:inherit;font-size:13px;font-weight:700;padding:9px 0 0;cursor:pointer}
+.trip-detail-toggle,.timetable-time-button{display:flex;align-items:center;justify-content:space-between;gap:18px;width:148px;max-width:100%;margin:12px 0 0 auto;padding:9px 15px;border:2px solid #fff;border-radius:999px;background:#527bd0;color:#fff;font:inherit;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 1px 4px #0002}
+.trip-detail-toggle:after,.timetable-time-button:after{content:"⌄";font-size:19px;line-height:12px}
+.trip-detail-toggle[aria-expanded="true"]:after,.timetable-time-button[aria-expanded="true"]:after{content:"⌃"}
 .stop-detail{margin-top:14px;padding:14px 14px 4px;background:#f8fafc;border-radius:12px}
 .stop-detail-title{font-size:14px;font-weight:800;margin-bottom:12px}
 .stop-sequence{list-style:none;margin:0;padding:0 0 0 3px}
@@ -58,7 +60,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <header>
   <div class="header-top">
     <div>
-      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.4</span></div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.5</span></div>
       <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
     </div>
     <div class="header-actions">
@@ -471,7 +473,7 @@ const stopSequences={
 };
 function stopSequenceFor(trip){return (stopSequences[trip.stop]||{})[trip.route]||null;}
 function stopDetailHTML(trip,id){const stops=stopSequenceFor(trip);if(!stops)return "";return '<div class="stop-detail hidden" id="'+id+'"><div class="stop-detail-title">停車駅</div><ol class="stop-sequence">'+stops.map((name,i)=>'<li><span class="stop-dot"></span><span class="stop-name">'+escapeHTML(name)+(i===0?'<span class="stop-note">始発</span>':i===stops.length-1?'<span class="stop-note">終点</span>':"")+'</span></li>').join("")+'</ol></div>';}
-function bindStopDetailToggles(root){if(root.dataset.stopToggleBound==="1")return;root.dataset.stopToggleBound="1";root.addEventListener("click",event=>{const button=event.target.closest("[data-stop-toggle]");if(!button)return;const panel=$(button.dataset.stopToggle);if(!panel)return;const opening=panel.classList.contains("hidden");panel.classList.toggle("hidden",!opening);button.setAttribute("aria-expanded",String(opening));button.textContent=opening?"停車駅を閉じる ▲":"停車駅を見る ▼";});}
+function bindStopDetailToggles(root){if(root.dataset.stopToggleBound==="1")return;root.dataset.stopToggleBound="1";root.addEventListener("click",event=>{const button=event.target.closest("[data-stop-toggle]");if(!button)return;const panel=$(button.dataset.stopToggle);if(!panel)return;const opening=panel.classList.contains("hidden");panel.classList.toggle("hidden",!opening);button.setAttribute("aria-expanded",String(opening));button.textContent=opening?"停車駅を閉じる":"停車駅を見る";});}
 
 function renderHomeMatrix(target,mode){
  const prefix=mode==="dep"?"dep":"tt";
@@ -545,7 +547,7 @@ function renderDepartures(){
   if(index===0)cardHtml+='<span class="pill" style="background:#e97860;color:#fff;font-size:14px;padding:7px 13px;font-weight:850">先発</span>';
   cardHtml+='<span class="bigtime">'+trip.time+'</span>'+(route?'<span style="font-size:19px;font-weight:900;background:#e8f1ff;color:#174a85;padding:5px 11px;border-radius:9px">'+route+'</span>':'')+'<span style="font-size:18px;font-weight:800">'+escapeHTML(destination)+'</span></div>';
   if(via)cardHtml+='<div style="font-size:15px;font-weight:600;margin-top:10px;color:var(--muted,#666)">経由：'+escapeHTML(via)+'</div>';
-  if(detail)cardHtml+='<button type="button" class="trip-detail-toggle" data-stop-toggle="'+detailId+'" aria-expanded="false">停車駅を見る ▼</button>'+detail;
+  if(detail)cardHtml+='<button type="button" class="trip-detail-toggle" data-stop-toggle="'+detailId+'" aria-expanded="false">停車駅を見る</button>'+detail;
   return cardHtml+'</div>';
  }).join("");
  const empty=list.length?"":'<div class="empty">明日23:59までに発車する便はありません。</div>';
