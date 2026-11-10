@@ -56,13 +56,17 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 
 /* 全要素を游ゴシック Medium・ウェイト500に統一 */
 *,*::before,*::after{font-family:"Yu Gothic Medium","游ゴシック Medium","YuGothic Medium","Yu Gothic","游ゴシック体","Hiragino Kaku Gothic ProN",Meiryo,sans-serif!important;font-weight:500!important}
+
+/* スマホ表示の文字とボタンをもう一段階コンパクトに */
+@media(max-width:600px){body{font-size:13px}h2{font-size:17px}h3,.home-heading{font-size:13px}.place{font-size:11px}.home-button{font-size:12px;min-height:52px;padding-top:6px;padding-bottom:6px}.bigtime{font-size:24px}.muted{font-size:10px}label{font-size:11px}nav button,.btn{font-size:12px;padding-top:8px;padding-bottom:8px}}
+@media(max-width:360px){.brand{font-size:18px}.sub{font-size:10px}.home-button{font-size:10px;min-height:44px;padding-top:5px;padding-bottom:5px}.home-heading{font-size:11px}.place{font-size:10px}.bigtime{font-size:21px}h2{font-size:15px}h3{font-size:12px}th,td{font-size:11px}}
 </style>
 </head>
 <body>
 <header>
   <div class="header-top">
     <div>
-      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.19</span></div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.20</span></div>
       <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
     </div>
     <div class="header-actions">
