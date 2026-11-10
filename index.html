@@ -61,7 +61,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <header>
   <div class="header-top">
     <div>
-      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.15</span></div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.16</span></div>
       <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
     </div>
     <div class="header-actions">
@@ -212,7 +212,7 @@ const stationRoutes={
  "本八幡駅":["11","12","13","14","15","16","71","74","臨時"],
  "市川大野駅":["路線バス","臨時"],
  "西船橋駅":["一般"],
- "市川学園（本八幡）":["11","12","13","14","15","16","71","74","臨時"],
+ "市川学園（本八幡）":["11","12","13","14","15","16","71","74","臨時","スクールバス"],
  "市川学園（市川大野）":["路線バス"],
  "正門前（本八幡）":["16","74","臨時","スクールバス"],
  "正門前（市川大野）":["臨時","スクールバス"],
@@ -459,7 +459,7 @@ const stopSequences={
   "臨時":["市川大野駅","市川学園正門前"]
  },
  "西船橋駅":{"一般":["西船橋駅","東中山駅入口","市川学園正門前"],"貸切":["西船橋駅","市川学園正門前"]},
- "市川学園（本八幡）":{"11":common11,"12":common11,"13":common11,"14":common11,"15":common11,"71":["市川学園","JA市川市本店","中山団地","本北方一丁目","本北方一丁目南","八方橋","北方二丁目","市川税務署","鬼越駅","消防局","八幡一丁目","市役所","本八幡駅"],"74":["市川学園","JA市川市本店","中山団地","本北方一丁目","本北方一丁目南","八方橋","北方二丁目","市川税務署","鬼越駅","消防局","八幡一丁目","市役所","本八幡駅"]},
+ "市川学園（本八幡）":{"11":common11,"12":common11,"13":common11,"14":common11,"15":common11,"71":["市川学園","JA市川市本店","中山団地","本北方一丁目","本北方一丁目南","八方橋","北方二丁目","市川税務署","鬼越駅","消防局","八幡一丁目","市役所","本八幡駅"],"74":["市川学園","JA市川市本店","中山団地","本北方一丁目","本北方一丁目南","八方橋","北方二丁目","市川税務署","鬼越駅","消防局","八幡一丁目","市役所","本八幡駅"],"スクールバス":["市川学園","京成八幡駅","本八幡駅"]},
  "正門前（本八幡）":{
   "16":["市川学園正門前","市川学園","JA市川市本店","東菅野四丁目","東菅野三丁目","八幡六丁目","東菅野一丁目","八幡四丁目","京成八幡駅","本八幡駅"],
   "74":["市川学園正門前","市川学園","JA市川市本店","中山団地","本北方一丁目","本北方一丁目南","八方橋","北方二丁目","市川税務署","鬼越駅","消防局","八幡一丁目","市役所","本八幡駅"],
@@ -477,7 +477,7 @@ function stopDirectionsFor(trip){
  if(stop==="本八幡駅"&&["11","12","13","14","15"].includes(route))return {after:"↓市川大野駅方面へ"};
  if(stop==="市川大野駅"&&["13","14","15","路線バス"].includes(route))return {before:"↓医療センター入口方面から",after:"↓本八幡駅方面へ"};
  if(stop==="市川学園（本八幡）"&&["11","12","13","14","15"].includes(route))return {before:"↓市川大野駅方面から"};
- if(stop==="市川学園（本八幡）"&&route==="74")return {before:"↓市川学園正門前から"};
+ if(stop==="市川学園（本八幡）"&&["74","スクールバス"].includes(route))return {before:"↓市川学園正門前から"};
  if(stop==="市川学園（市川大野）"&&route==="路線バス")return {before:"↓本八幡駅方面から",after:"↓医療センター入口方面へ"};
  return {};
 }
@@ -495,7 +495,21 @@ function renderHomeMatrix(target,mode){
 }
 bindStopDetailToggles($("depResult"));bindStopDetailToggles($("ttResult"));
 renderHomeMatrix("depMatrix","dep");renderHomeMatrix("timeMatrix","tt");
-function filtered(stop,date,route){return trips.filter(t=>t.stop===stop&&(!date||t.date===date)&&(!route||route==="すべて"||t.route===route)).sort((a,b)=>a.time.localeCompare(b.time))}
+function derivedSchoolBusTrips(stop){
+ if(stop!=="市川学園（本八幡）")return [];
+ return trips.filter(t=>t.stop==="正門前（本八幡）"&&t.route==="スクールバス").map(source=>{
+  const [y,m,d]=source.date.split("-").map(Number);
+  const [h,min]=source.time.split(":").map(Number);
+  const campusTime=new Date(y,m-1,d,h,min+1);
+  const date=campusTime.getFullYear()+"-"+String(campusTime.getMonth()+1).padStart(2,"0")+"-"+String(campusTime.getDate()).padStart(2,"0");
+  const time=String(campusTime.getHours()).padStart(2,"0")+":"+String(campusTime.getMinutes()).padStart(2,"0");
+  return {...source,id:"derived-schoolbus-"+String(source.id||source.date+"-"+source.time).replace(/[^a-zA-Z0-9_-]/g,""),date,time,stop:"市川学園（本八幡）",route:"スクールバス",displayDest:"本八幡駅",via:"京成八幡駅",derivedFromGate:true};
+ });
+}
+function filtered(stop,date,route){
+ const source=stop==="市川学園（本八幡）"?trips.filter(t=>t.stop===stop).concat(derivedSchoolBusTrips(stop)):trips.filter(t=>t.stop===stop);
+ return source.filter(t=>(!date||t.date===date)&&(!route||route==="すべて"||t.route===route)).sort((a,b)=>(a.date+" "+a.time).localeCompare(b.date+" "+b.time));
+}
 function refreshViews(){renderDepartures();renderTimetable()}
 function renderDepartures(){
  if(!$("depStop").value)return;
