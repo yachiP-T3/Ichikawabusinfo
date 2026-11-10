@@ -61,7 +61,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <header>
   <div class="header-top">
     <div>
-      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.11</span></div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.12</span></div>
       <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
     </div>
     <div class="header-actions">
@@ -204,13 +204,14 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <script>
 // 発車場所そのものを識別子として管理する。到着場所の項目・絞り込みは使用しない。
 const places=[
- "本八幡駅","市川大野駅",
+ "本八幡駅","市川大野駅","西船橋駅",
  "市川学園（本八幡）","市川学園（市川大野）",
  "正門前（本八幡）","正門前（市川大野）","正門前（西船橋）","市川学園（市川駅）","市川駅",
  ];
 const stationRoutes={
  "本八幡駅":["11","12","13","14","15","16","71","74","臨時"],
  "市川大野駅":["路線バス","臨時"],
+ "西船橋駅":["一般"],
  "市川学園（本八幡）":["11","12","13","14","15","16","71","74","臨時"],
  "市川学園（市川大野）":["路線バス"],
  "正門前（本八幡）":["16","74","臨時","スクールバス"],
@@ -392,7 +393,7 @@ function fillRouteDetails(){
 }
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 options("adminStop",places);options("copyStop",places);
-const fixedPlaces=["本八幡駅","市川大野駅","市川学園（本八幡）","市川学園（市川大野）","市川学園（市川駅）"];options("fixedStop",fixedPlaces);$("fixedDate").value=today();$("fixedDate").addEventListener("change",updateFixedForm);$("fixedStop").addEventListener("change",updateFixedForm);$("registerFixed").addEventListener("click",registerFixedSchedule);
+const fixedPlaces=["本八幡駅","市川大野駅","西船橋駅","市川学園（本八幡）","市川学園（市川大野）","市川学園（市川駅）"];options("fixedStop",fixedPlaces);$("fixedDate").value=today();$("fixedDate").addEventListener("change",updateFixedForm);$("fixedStop").addEventListener("change",updateFixedForm);$("registerFixed").addEventListener("click",registerFixedSchedule);
 ["ttDate","addDate","adminDate","copyFrom","copyTo"].forEach(id=>$(id).value=today());
 fillRouteDetails();
 function go(page){document.querySelectorAll("main>section").forEach(x=>x.classList.add("hidden"));$(page).classList.remove("hidden");if(page==="departures")renderDepartures();if(page==="timetable")renderTimetable();if(page==="admin")refreshAuthState();window.scrollTo(0,0)}
@@ -424,6 +425,7 @@ const homeRows=[
  {heading:"各駅 → 市川学園",items:[
   {label:"本八幡駅 発",stop:"本八幡駅",colour:"hachiman"},
   {label:"市川大野駅 発",stop:"市川大野駅",colour:"ono"},
+  {label:"西船橋駅 発",stop:"西船橋駅",colour:"funabashi"},
   {label:"市川駅 発",stop:"市川駅",colour:"ichikawa"}]},
  {heading:"市川学園正門前 → 各駅",items:[
   {label:"本八幡駅 方面",stop:"正門前（本八幡）",colour:"hachiman"},
