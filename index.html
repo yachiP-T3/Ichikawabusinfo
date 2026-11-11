@@ -66,7 +66,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <header>
   <div class="header-top">
     <div>
-      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.20</span></div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.21</span></div>
       <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
     </div>
     <div class="header-actions">
@@ -164,7 +164,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
   <div class="panel">
     <h3>固定時刻を登録する</h3>
     <p class="muted">日付から平日・土曜・日曜祝日ダイヤを自動判定し、選択した発車場所の固定便を登録します。</p>
-    <div class="row"><div><label>日付</label><input type="date" id="fixedDate"></div><div><label>発車場所</label><select id="fixedStop"></select></div></div>
+    <div class="row"><div><label>日付</label><input type="date" id="fixedDate"></div><div><label>発車場所</label><select id="fixedStop"></select></div><div><label>時間帯</label><select id="fixedHour"></select></div></div>
     <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:12px">
       <label style="display:flex;align-items:center;gap:7px;margin:0"><input type="checkbox" id="fixedBus" checked style="width:auto">路線バス</label>
       <label id="fixedTempLabel" style="display:flex;align-items:center;gap:7px;margin:0"><input type="checkbox" id="fixedTemp" checked style="width:auto">臨時便</label>
@@ -400,7 +400,7 @@ function fillRouteDetails(){
 }
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 options("adminStop",places);options("copyStop",places);
-const fixedPlaces=["本八幡駅","市川大野駅","西船橋駅","市川駅","市川学園（本八幡）","市川学園（市川大野）","市川学園（市川駅）"];options("fixedStop",fixedPlaces);$("fixedDate").value=today();$("fixedDate").addEventListener("change",updateFixedForm);$("fixedStop").addEventListener("change",updateFixedForm);$("registerFixed").addEventListener("click",registerFixedSchedule);
+const fixedPlaces=["本八幡駅","市川大野駅","西船橋駅","市川駅","市川学園（本八幡）","市川学園（市川大野）","市川学園（市川駅）"];options("fixedStop",fixedPlaces);$("fixedDate").value=today();$("fixedDate").addEventListener("change",()=>updateFixedForm(true));$("fixedStop").addEventListener("change",()=>updateFixedForm(true));$("fixedHour").addEventListener("change",()=>updateFixedForm(false));$("registerFixed").addEventListener("click",registerFixedSchedule);
 ["ttDate","addDate","adminDate","copyFrom","copyTo"].forEach(id=>$(id).value=today());
 fillRouteDetails();
 function go(page){document.querySelectorAll("main>section").forEach(x=>x.classList.add("hidden"));$(page).classList.remove("hidden");if(page==="departures")renderDepartures();if(page==="timetable")renderTimetable();if(page==="admin")refreshAuthState();window.scrollTo(0,0)}
@@ -657,12 +657,38 @@ function japaneseHolidays(year){
 function fixedDayType(value){const p=value.split("-").map(Number);const d=new Date(p[0],p[1]-1,p[2]);if(d.getDay()===6)return "saturday";if(d.getDay()===0||japaneseHolidays(p[0]).has(value))return "holiday";return "weekday";}
 function fixedDayLabel(type){return type==="weekday"?"平日ダイヤ":type==="saturday"?"土曜ダイヤ":"日曜・祝日ダイヤ";}
 function fixedRowsForDate(stop,date){const type=fixedDayType(date);const rows=parseFixedRows(fixedScheduleData[stop]?.[type]||"");return new Date(date+"T00:00:00").getDay()===4?rows.filter(row=>!row.time.startsWith("15:")):rows;}
-function updateFixedForm(){const date=$("fixedDate").value,stop=$("fixedStop").value,type=date?fixedDayType(date):"";const rows=type?fixedRowsForDate(stop,date):[];const hasTemp=rows.some(x=>x.route==="臨時");$("fixedTempLabel").classList.toggle("hidden",!hasTemp);$("fixedTemp").checked=hasTemp;$("fixedBus").checked=true;$("fixedDayType").textContent=date?fixedDayLabel(type)+" ／ "+(rows.length?rows.length+"便の固定時刻があります":"この発車場所・曜日の固定時刻はありません"):"日付を選択してください。";$("fixedMessage").textContent="";}
+function updateFixedForm(resetChecks=true){
+ const date=$("fixedDate").value,stop=$("fixedStop").value,type=date?fixedDayType(date):"";
+ const rows=type?fixedRowsForDate(stop,date):[];
+ const hourSelect=$("fixedHour"),previousHour=hourSelect.value;
+ const hours=[...new Set(rows.map(row=>row.time.slice(0,2)))].sort();
+ hourSelect.innerHTML=hours.map(hour=>'<option value="'+hour+'">'+Number(hour)+'時台</option>').join("");
+ if(hours.includes(previousHour))hourSelect.value=previousHour;
+ else if(hours.length)hourSelect.value=hours[0];
+ const hour=hourSelect.value;
+ const hourRows=hour?rows.filter(row=>row.time.startsWith(hour+":")):[];
+ const hasBus=hourRows.some(row=>row.route!=="臨時"),hasTemp=hourRows.some(row=>row.route==="臨時");
+ $("fixedBus").disabled=!hasBus;
+ $("fixedTemp").disabled=!hasTemp;
+ $("fixedTempLabel").classList.toggle("hidden",!rows.some(row=>row.route==="臨時"));
+ if(resetChecks){
+  $("fixedBus").checked=hasBus;
+  $("fixedTemp").checked=hasTemp;
+ }else{
+  if(!hasBus)$("fixedBus").checked=false;
+  if(!hasTemp)$("fixedTemp").checked=false;
+ }
+ const count=hourRows.length;
+ $("fixedDayType").textContent=date
+  ?fixedDayLabel(type)+" ／ "+(hour?Number(hour)+"時台："+count+"便（路線バス："+hourRows.filter(row=>row.route!=="臨時").length+"便・臨時："+hourRows.filter(row=>row.route==="臨時").length+"便）":"この発車場所・曜日の固定時刻はありません")
+  :"日付を選択してください。";
+ $("fixedMessage").textContent="";
+}
 async function registerFixedSchedule(){
  if(currentAuthUser?.id!==ADMIN_UID){$("fixedMessage").textContent="管理者としてログインしてください。";return;}
  const date=$("fixedDate").value,stop=$("fixedStop").value;if(!date){$("fixedMessage").textContent="登録する日付を選択してください。";return;}
  const type=fixedDayType(date),rows=fixedRowsForDate(stop,date);if(!rows.length){$("fixedMessage").textContent="この発車場所・曜日の固定時刻はありません。";return;}
- const selected=rows.filter(x=>x.route==="臨時"?$("fixedTemp").checked:$("fixedBus").checked);if(!selected.length){$("fixedMessage").textContent="登録する便種別を選択してください。";return;}
+ const hour=$("fixedHour").value;if(!hour){$("fixedMessage").textContent="登録する時間帯を選択してください。";return;}const selected=rows.filter(x=>x.time.startsWith(hour+":")&&(x.route==="臨時"?$("fixedTemp").checked:$("fixedBus").checked));if(!selected.length){$("fixedMessage").textContent="登録する便種別を選択してください。";return;}
  const existing=new Set(trips.filter(t=>t.date===date&&t.stop===stop).map(t=>t.time+"|"+t.route));const seen=new Set(),fresh=[],duplicates=[];
  for(const row of selected){const key=row.time+"|"+row.route;if(existing.has(key)||seen.has(key)){duplicates.push(row);continue;}seen.add(key);const info=routeMaster[row.route];fresh.push({date:date,time:row.time,stop:stop,route:row.route,display_dest:info?destinationFor(stop,row.route):"",via:info?viaFor(stop,row.route):""});}
  $("registerFixed").disabled=true;$("fixedMessage").textContent="登録中…";
