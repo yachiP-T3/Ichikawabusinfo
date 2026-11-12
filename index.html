@@ -67,7 +67,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <header>
   <div class="header-top">
     <div>
-      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.26</span></div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.27</span></div>
       <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
     </div>
     <div class="header-actions">
@@ -577,7 +577,7 @@ function renderDepartures(){
   const detail=stopDetailHTML(trip,detailId);
   let cardHtml='<div class="panel departure-card" data-stop-toggle="'+detailId+'" aria-expanded="false" style="margin:0 0 10px;padding:16px 18px;cursor:pointer"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">';
   if(index===0)cardHtml+='<span class="pill" style="background:#e97860;color:#fff;font-size:14px;padding:7px 13px;font-weight:850">先発</span>';
-  cardHtml+='<span class="bigtime">'+trip.time+'</span>'+(route?'<span style="font-size:19px;font-weight:900;background:#e8f1ff;color:#174a85;padding:5px 11px;border-radius:9px">'+route+'</span>':'')+'<span style="font-size:18px;font-weight:800">'+escapeHTML(destination)+'</span>'+</div>';
+  cardHtml+='<span class="bigtime">'+trip.time+'</span>'+(route?'<span style="font-size:19px;font-weight:900;background:#e8f1ff;color:#174a85;padding:5px 11px;border-radius:9px">'+route+'</span>':'')+'<span style="font-size:18px;font-weight:800">'+escapeHTML(destination)+'</span></div>';
   if(via)cardHtml+='<div style="font-size:15px;font-weight:600;margin-top:10px;color:var(--muted,#666)">経由：'+escapeHTML(via)+'</div>';
   if(detail)cardHtml+=detail;
   return cardHtml+'</div>';
