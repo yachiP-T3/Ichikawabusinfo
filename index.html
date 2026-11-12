@@ -53,7 +53,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 .timetable-detail-row td{background:#f8fafc;padding:12px 14px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,18px);opacity:0;pointer-events:none;background:#17212b;color:#fff;padding:13px 20px;border-radius:12px;box-shadow:0 6px 24px #0003;font-size:14px;font-weight:800;z-index:9999;transition:opacity .22s ease,transform .22s ease;max-width:calc(100vw - 32px);text-align:center}#toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:360px){header{padding:12px}.brand{font-size:19px}.sub{font-size:11px}main{padding:0 10px 36px}.panel{padding:10px;border-radius:12px}.home-matrix,.home-group{gap:5px}.home-button{font-size:11px;padding:7px 2px;min-height:50px;border-left-width:3px}.home-heading{font-size:12px}.linkcard{padding:11px 9px;gap:4px}.place{font-size:11px}.arrow{font-size:15px}.bigtime{font-size:22px}h2{font-size:16px}h3{font-size:13px}nav button,.btn{font-size:12px;padding:8px 9px}th,td{padding:8px 5px;font-size:12px}}
-@media(max-width:600px){header{padding:16px}.header-top{align-items:flex-start;flex-direction:column;gap:8px}.header-actions{gap:18px}.panel{padding:14px}main{margin-top:16px}.linkcard{gap:5px}.place{font-size:12px}body{font-size:14px}h2{font-size:18px}h3{font-size:14px}.home-heading{font-size:14px}.home-button{font-size:13px}.bigtime{font-size:25px}.muted{font-size:11px}label{font-size:12px}nav button,.btn{font-size:13px;padding:9px 12px}}
+@media(max-width:600px){.timetable-table th:nth-child(4),.timetable-table td:nth-child(4){display:none}header{padding:16px}.header-top{align-items:flex-start;flex-direction:column;gap:8px}.header-actions{gap:18px}.panel{padding:14px}main{margin-top:16px}.linkcard{gap:5px}.place{font-size:12px}body{font-size:14px}h2{font-size:18px}h3{font-size:14px}.home-heading{font-size:14px}.home-button{font-size:13px}.bigtime{font-size:25px}.muted{font-size:11px}label{font-size:12px}nav button,.btn{font-size:13px;padding:9px 12px}}
 
 /* 全要素を游ゴシック Medium・ウェイト500に統一 */
 *,*::before,*::after{font-family:"Yu Gothic Medium","游ゴシック Medium","YuGothic Medium","Yu Gothic","游ゴシック体","Hiragino Kaku Gothic ProN",Meiryo,sans-serif!important;font-weight:500!important}
@@ -67,7 +67,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <header>
   <div class="header-top">
     <div>
-      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.25</span></div>
+      <div class="brand" id="homeTitle" role="button" tabindex="0" title="ホームへ戻る">バス時刻表配信 <span style="color:#1769aa">created by yachiP</span> <span class="version">v1.26</span></div>
       <div class="sub">市川学園周辺バス停の時刻・発車情報</div>
     </div>
     <div class="header-actions">
@@ -80,7 +80,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 <main>
 
 <section id="home">
-  <div class="panel"><h2>先発確認 / 運行情報</h2><div class="home-matrix" id="depMatrix">
+  <div class="panel"><h2>先発情報</h2><div class="home-matrix" id="depMatrix">
   <div class="home-group"><h3 class="home-heading">各駅 → 市川学園</h3>
     <button class="home-button route-hachiman" data-stop="本八幡駅">本八幡駅 発</button>
     <button class="home-button route-ono" data-stop="市川大野駅">市川大野駅 発</button>
@@ -96,7 +96,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
     
   </div>
 </div></div>
-  <div class="panel"><h2>時刻表確認</h2><div class="home-matrix" id="timeMatrix">
+  <div class="panel"><h2>時刻表</h2><div class="home-matrix" id="timeMatrix">
   <div class="home-group"><h3 class="home-heading">各駅 → 市川学園</h3>
     <button class="home-button route-hachiman" data-stop="本八幡駅">本八幡駅 発</button>
     <button class="home-button route-ono" data-stop="市川大野駅">市川大野駅 発</button>
@@ -121,7 +121,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </section>
 <section id="departures" class="hidden">
   <div class="panel">
-    <h2>先発確認</h2>
+    <h2>先発情報</h2>
     <p class="muted">選択した発車場所から、現在時刻以降に出発する次の便を表示します。日付をまたいで検索します。</p>
     <div><label>発車場所</label><select id="depStop"></select></div>
     <div id="depResult"></div>
@@ -129,7 +129,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;
 </section>
 <section id="timetable" class="hidden">
   <div class="panel">
-    <h2>時刻表確認</h2>
+    <h2>時刻表</h2>
     <div class="row"><div><label>発車場所</label><select id="ttStop"></select></div><div><label>系統</label><select id="ttRoute"></select></div><div><label>日付</label><input type="date" id="ttDate"></div></div>
     <div id="ttResult"></div>
   </div>
@@ -392,6 +392,7 @@ function viaFor(stop,route){
 }
 function displayRoute(route,stop){if(["一般","貸切"].includes(route)&&stop!=="正門前（西船橋）")return "";return /^\d/.test(route)?"本"+route:(route==="系統なし"?"":route);}
 function displayDestination(t){const d=(routeMaster[t.route]&&destinationFor(t.stop,t.route))||t.displayDest||t.dest||"—";return d;}
+function resultDetailInstruction(){return '<p class="notice" style="margin:12px 0">バスの部分を押すと詳細が表示されます。</p>';}
 function schoolToHachimanNotice(stop){return stop==="本八幡駅"?'<p class="notice" style="color:#c62828;background:#fff1f1;border-color:#efb2b2;font-weight:800">臨時はスクールバスも含みます。</p>':"";}
 function fillRouteDetails(){
  const stop=$("addStop").value, route=$("addRoute").value;
@@ -576,24 +577,24 @@ function renderDepartures(){
   const detail=stopDetailHTML(trip,detailId);
   let cardHtml='<div class="panel departure-card" data-stop-toggle="'+detailId+'" aria-expanded="false" style="margin:0 0 10px;padding:16px 18px;cursor:pointer"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">';
   if(index===0)cardHtml+='<span class="pill" style="background:#e97860;color:#fff;font-size:14px;padding:7px 13px;font-weight:850">先発</span>';
-  cardHtml+='<span class="bigtime">'+trip.time+'</span>'+(route?'<span style="font-size:19px;font-weight:900;background:#e8f1ff;color:#174a85;padding:5px 11px;border-radius:9px">'+route+'</span>':'')+'<span style="font-size:18px;font-weight:800">'+escapeHTML(destination)+'</span>'+(detail?'<button type="button" class="trip-detail-toggle" data-stop-toggle="'+detailId+'" aria-expanded="false" aria-label="停車駅を表示">押して開く</button>':'')+'</div>';
+  cardHtml+='<span class="bigtime">'+trip.time+'</span>'+(route?'<span style="font-size:19px;font-weight:900;background:#e8f1ff;color:#174a85;padding:5px 11px;border-radius:9px">'+route+'</span>':'')+'<span style="font-size:18px;font-weight:800">'+escapeHTML(destination)+'</span>'+</div>';
   if(via)cardHtml+='<div style="font-size:15px;font-weight:600;margin-top:10px;color:var(--muted,#666)">経由：'+escapeHTML(via)+'</div>';
   if(detail)cardHtml+=detail;
   return cardHtml+'</div>';
  }).join("");
  const empty=list.length?"":'<div class="empty">明日23:59までに発車する便はありません。</div>';
- $("depResult").innerHTML=schoolToHachimanNotice(selected)+`<p class="muted">${current} 現在 · ${selected} · 今日から明日23:59まで</p>`+empty+timeline;
+ $("depResult").innerHTML=resultDetailInstruction()+schoolToHachimanNotice(selected)+`<p class="muted">${current} 現在 · ${selected} · 今日から明日23:59まで</p>`+empty+timeline;
 }
 function renderTimetable(){
  if(!$("ttStop").value)return;
  const stop=$("ttStop").value,list=filtered(stop,$("ttDate").value,$("ttRoute").value);
  const simple=stop==="西船橋駅"||stop==="市川学園（市川大野）";
- if(!list.length){$("ttResult").innerHTML=schoolToHachimanNotice(stop)+'<div class="empty">この条件の便はまだ登録されていません。</div>';return;}
- let html='<table><thead><tr><th>発車時刻</th>'+(simple?'':'<th>系統</th>')+'<th>行先</th>'+(simple?'':'<th>経由</th>')+'</tr></thead><tbody>';
+ if(!list.length){$("ttResult").innerHTML=resultDetailInstruction()+schoolToHachimanNotice(stop)+'<div class="empty">この条件の便はまだ登録されていません。</div>';return;}
+ let html='<table class="timetable-table"><thead><tr><th>発車時刻</th>'+(simple?'':'<th>系統</th>')+'<th>行先</th>'+(simple?'':'<th>経由</th>')+'</tr></thead><tbody>';
  list.forEach((t,i)=>{
   const detailId="tt-detail-"+String(t.id||((t.date||"")+"-"+t.time+"-"+i)).replace(/[^a-zA-Z0-9_-]/g,"");
   const detail=stopDetailHTML(t,detailId);
-  html+='<tr><td>'+(detail?'<span style="display:inline-flex;align-items:center;gap:8px"><b>'+t.time.slice(0,5)+'</b><button type="button" class="timetable-time-button" data-stop-toggle="'+detailId+'" aria-expanded="false" aria-label="停車駅を表示">押して開く</button></span>':'<b>'+t.time.slice(0,5)+'</b>')+'</td>';
+  html+='<tr'+(detail?' data-stop-toggle="'+detailId+'" aria-expanded="false" style="cursor:pointer"':'')+'><td><b>'+t.time.slice(0,5)+'</b></td>';
   if(!simple)html+='<td>'+escapeHTML(displayRoute(stop==="市川学園（市川駅）"&&t.route==="系統なし"?"市61":t.route,stop)||"—")+'</td>';
   html+='<td>'+escapeHTML(displayDestination(t))+'</td>';
   if(!simple)html+='<td>'+escapeHTML(viaFor(t.stop,t.route)||t.via||"—")+'</td>';
@@ -601,7 +602,7 @@ function renderTimetable(){
   if(detail)html+='<tr class="timetable-detail-row"><td colspan="'+(simple?2:4)+'">'+detail+'</td></tr>';
  });
  html+='</tbody></table>';
- $("ttResult").innerHTML=schoolToHachimanNotice(stop)+html;
+ $("ttResult").innerHTML=resultDetailInstruction()+schoolToHachimanNotice(stop)+html;
 }
 
 
